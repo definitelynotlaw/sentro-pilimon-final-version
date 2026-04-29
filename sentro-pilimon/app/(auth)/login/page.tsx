@@ -1,0 +1,269 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
+import { PLMunLogo } from '@/components/shared/PLMunLogo'
+import { Mail, Lock, Loader2 } from 'lucide-react'
+
+export default function LoginPage() {
+  const router = useRouter()
+  const supabase = createClient()
+  const [isLoading, setIsLoading] = useState(false)
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
+
+  // Redirect if already logged in (additional client-side check alongside middleware)
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        router.push('/dashboard')
+      }
+    }
+    checkAuth()
+  }, [router, supabase])
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsLoading(true)
+    setError('')
+
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
+
+      if (error) {
+        setError(error.message)
+      } else {
+        router.push('/dashboard')
+        router.refresh()
+      }
+    } catch {
+      setError('An unexpected error occurred')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleMagicLink = async () => {
+    if (!email) {
+      setError('Please enter your email address')
+      return
+    }
+    setIsLoading(true)
+    setError('')
+
+    try {
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        },
+      })
+
+      if (error) {
+        setError(error.message)
+      } else {
+        setError('Check your email for the magic link!')
+      }
+    } catch {
+      setError('An unexpected error occurred')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  return (
+    <main
+      className="min-h-screen flex flex-col items-center justify-center p-4"
+      style={{ backgroundColor: '#FAFAF7' }}
+    >
+      <div className="w-full max-w-md">
+        {/* Logo */}
+        <div className="flex flex-col items-center mb-8">
+          <Link href="/"><PLMunLogo size="xl" className="mb-4 hover-lift" /></Link>
+          <h1
+            className="text-2xl font-bold"
+            style={{ color: '#6B0000', fontFamily: "'Playfair Display', Georgia, serif" }}
+          >
+            Sentro Pilimon
+          </h1>
+          <p className="text-sm mt-1" style={{ color: '#5A5A56' }}>
+            Sign in to your PLMun account
+          </p>
+        </div>
+
+        {/* Form Card */}
+        <div
+          className="bg-white rounded-2xl p-6 md:p-8"
+          style={{
+            border: '1px solid #EBEBEA',
+            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+          }}
+        >
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Email */}
+            <div>
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium mb-1"
+                style={{ color: '#5A5A56' }}
+              >
+                Email Address
+              </label>
+              <div className="relative">
+                <Mail
+                  className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5"
+                  style={{ color: '#9A9A95' }}
+                />
+                <input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="student@plmun.edu.ph"
+                  className="w-full pl-10 pr-4 py-3 rounded-lg text-base"
+                  style={{
+                    border: '1px solid #D4D4CF',
+                    outline: 'none',
+                  }}
+                  required
+                />
+              </div>
+            </div>
+
+            {/* Password */}
+            <div>
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium mb-1"
+                style={{ color: '#5A5A56' }}
+              >
+                Password
+              </label>
+              <div className="relative">
+                <Lock
+                  className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5"
+                  style={{ color: '#9A9A95' }}
+                />
+                <input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="w-full pl-10 pr-4 py-3 rounded-lg text-base"
+                  style={{
+                    border: '1px solid #D4D4CF',
+                    outline: 'none',
+                  }}
+                  required
+                />
+              </div>
+            </div>
+
+            {/* Error */}
+            {error && (
+              <div
+                className="p-3 rounded-lg text-sm"
+                style={{
+                  backgroundColor: '#FEF2F2',
+                  border: '1px solid #FECACA',
+                  color: '#9B1C1C',
+                }}
+              >
+                {error}
+              </div>
+            )}
+
+            {/* Submit */}
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full py-3 text-white font-medium rounded-lg flex items-center justify-center gap-2 transition-colors hover-lift"
+              style={{
+                backgroundColor: isLoading ? '#8B1010' : '#6B0000',
+                opacity: isLoading ? 0.5 : 1,
+              }}
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Signing in...
+                </>
+              ) : (
+                'Sign In'
+              )}
+            </button>
+          </form>
+
+          {/* Divider */}
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full" style={{ borderTop: '1px solid #D4D4CF' }} />
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-4 bg-white" style={{ color: '#9A9A95' }}>or</span>
+            </div>
+          </div>
+
+          {/* Magic Link */}
+          <button
+            onClick={handleMagicLink}
+            disabled={isLoading}
+            className="w-full py-3 font-medium rounded-lg transition-colors hover-lift"
+            style={{
+              border: '2px solid #6B0000',
+              color: '#6B0000',
+              backgroundColor: 'transparent',
+              opacity: isLoading ? 0.5 : 1,
+            }}
+          >
+            Send Magic Link
+          </button>
+
+          {/* Forgot Password */}
+          <div className="mt-4 text-center">
+            <Link
+              href="/forgot-password"
+              className="text-sm transition-colors mr-4 hover-lift"
+              style={{ color: '#C9972C' }}
+            >
+              Forgot your password?
+            </Link>
+          </div>
+
+          {/* Register link */}
+          <div className="mt-2 text-center">
+            <p className="text-sm" style={{ color: '#9A9A95' }}>
+              No account yet?{' '}
+              <Link
+                href="/register"
+                className="font-medium hover-lift"
+                style={{ color: '#6B0000' }}
+              >
+                Register
+              </Link>
+            </p>
+          </div>
+        </div>
+
+        {/* Back to home */}
+        <div className="mt-6 text-center">
+          <Link
+            href="/"
+            className="text-sm transition-colors hover-lift"
+            style={{ color: '#5A5A56' }}
+          >
+            ← Back to Bulletin
+          </Link>
+        </div>
+      </div>
+    </main>
+  )
+}
