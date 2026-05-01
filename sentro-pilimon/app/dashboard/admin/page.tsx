@@ -123,13 +123,13 @@ export default async function AdminDashboardPage() {
             </Link>
 
             <Link
-              href="/dashboard/moderation"
+              href="/dashboard/admin/posts"
               className="p-6 rounded-xl bg-white hover:shadow-md transition-shadow"
               style={{ border: '1px solid #EBEBEA' }}
             >
               <BarChart3 className="h-8 w-8 mb-3" style={{ color: '#6B0000' }} />
-              <h3 className="font-semibold mb-1" style={{ color: '#1A1A18' }}>Moderation</h3>
-              <p className="text-sm" style={{ color: '#5A5A56' }}>Review pending announcements</p>
+              <h3 className="font-semibold mb-1" style={{ color: '#1A1A18' }}>Manage Posts</h3>
+              <p className="text-sm" style={{ color: '#5A5A56' }}>View and delete any announcement</p>
             </Link>
           </div>
         </div>
