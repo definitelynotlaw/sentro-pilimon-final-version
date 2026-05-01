@@ -120,7 +120,7 @@ export default async function DepartmentChannelPage({ params }: PageProps) {
       {/* Description + Follow */}
       {(dept.short_description || user) && (
         <div className="max-w-4xl mx-auto px-4 py-6">
-          {dept.short_description && <p className="text-center mb-4" style={{ color: '#5A5A56' }}>{dept.short_description}</p>}
+          {dept.short_description && dept.short_description !== dept.college && <p className="text-center mb-4" style={{ color: '#5A5A56' }}>{dept.short_description}</p>}
           {user && <div className="flex justify-center"><FollowButton channelType="department" channelId={dept.id} userId={user.id} /></div>}
         </div>
       )}
