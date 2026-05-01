@@ -125,12 +125,6 @@ export default function ScanPage() {
 
           {isScanning && (
             <button
-              onClick={stopScanner}
-              className="absolute top-3 right-3 p-2 rounded-full z-10"
-              style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
-            >
-              <X className="h-5 w-5 text-white" />
-            </button>
           )}
 
           <div
