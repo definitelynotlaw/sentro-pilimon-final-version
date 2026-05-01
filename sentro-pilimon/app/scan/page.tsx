@@ -123,7 +123,6 @@ export default function ScanPage() {
             </div>
           )}
 
-          }
 
           <div
             className="absolute pointer-events-none"
