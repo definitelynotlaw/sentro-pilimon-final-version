@@ -1,14 +1,6 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-const useSearchQuery = () => {
-  if (typeof window === 'undefined') return ''
-  return new URLSearchParams(window.location.search).get('q') || ''
-}
-const useSearchQuery = () => {
-  if (typeof window === 'undefined') return ''
-  return new URLSearchParams(window.location.search).get('q') || ''
-}
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { Search, Menu, X, User, Settings, LogOut, ChevronDown } from 'lucide-react'
