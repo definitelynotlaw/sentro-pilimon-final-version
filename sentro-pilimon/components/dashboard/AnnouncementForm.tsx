@@ -26,7 +26,12 @@ interface Organization {
 interface AnnouncementFormProps {
   categories: Category[]
   organizations: Organization[]
-  initialData?: Partial<AnnouncementFormData & { id?: string }>
+  initialData?: Partial<AnnouncementFormData & {
+    id?: string
+    poster_crop_x?: number | null
+    poster_crop_y?: number | null
+    poster_zoom?: number | null
+  }>
 }
 
 export function AnnouncementForm({
@@ -41,9 +46,9 @@ export function AnnouncementForm({
   const [isUploading, setIsUploading] = useState(false)
   const [successMessage, setSuccessMessage] = useState('')
   const [posterCrop, setPosterCrop] = useState({
-  poster_crop_x?: number | null,
-  poster_crop_y?: number | null,
-  poster_zoom?: number | null,
+    x: initialData?.poster_crop_x || 0,
+    y: initialData?.poster_crop_y || 0,
+    zoom: initialData?.poster_zoom || 1,
   })
 
   const {
