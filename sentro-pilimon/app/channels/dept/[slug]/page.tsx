@@ -7,6 +7,7 @@ import { PLMunLogo } from '@/components/shared/PLMunLogo'
 import { BulletinGrid } from '@/components/bulletin/BulletinGrid'
 import { AnnouncementCardProps } from '@/components/bulletin/AnnouncementCard'
 import { FollowButton } from '@/components/channels/FollowButton'
+import { departments } from '@/data/organizations'
 
 interface PageProps {
   params: Promise<{ slug: string }>
@@ -21,7 +22,23 @@ async function getDepartmentChannel(slug: string) {
     .eq('slug', slug)
     .single()
 
-  if (!dept) return null
+  if (!dept) {
+    const staticDept = departments.find(d => d.slug === slug)
+    if (!staticDept) return null
+    return {
+      dept: {
+        id: staticDept.id,
+        name: staticDept.name,
+        slug: staticDept.slug,
+        accent_color: staticDept.accent_color,
+        short_description: null,
+        college: staticDept.college,
+        banner_url: null,
+        logo_url: null,
+      },
+      announcements: [],
+    }
+  }
 
   const { data: announcements } = await supabase
     .from('announcements')
