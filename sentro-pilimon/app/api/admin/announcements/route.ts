@@ -1,6 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
-import { revalidatePath } from 'next/cache'
 
 export async function DELETE(request: Request) {
   const supabase = await createClient()
