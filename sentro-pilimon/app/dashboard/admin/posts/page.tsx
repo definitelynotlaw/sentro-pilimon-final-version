@@ -12,9 +12,6 @@ interface Announcement {
   title: string
   status: string
   created_at: string
-  publisher: { full_name: string } | null
-  organization: { name: string } | null
-  category: { name: string; color: string } | null
 }
 
 export default function ManagePostsPage() {
@@ -23,6 +20,7 @@ export default function ManagePostsPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [confirmId, setConfirmId] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => { fetchAnnouncements() }, [])
 
@@ -33,17 +31,10 @@ export default function ManagePostsPage() {
         .select('id, title, status, created_at')
         .order('created_at', { ascending: false })
         .limit(50)
-      if (error) console.error('fetchAnnouncements error:', error)
-      if (data) {
-        setAnnouncements(data.map(d => ({
-          ...d,
-          publisher: null,
-          organization: null,
-          category: null,
-        })))
-      }
+      if (error) { console.error('fetch error:', error); setError(error.message) }
+      if (data) setAnnouncements(data)
     } catch (e) {
-      console.error('fetchAnnouncements exception:', e)
+      console.error('fetch exception:', e)
     } finally {
       setIsLoading(false)
     }
@@ -51,14 +42,25 @@ export default function ManagePostsPage() {
 
   const handleDelete = async (id: string) => {
     setDeletingId(id)
-    const res = await fetch('/api/admin/announcements', {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id }),
-    })
-    if (res.ok) setAnnouncements(prev => prev.filter(a => a.id !== id))
-    setDeletingId(null)
-    setConfirmId(null)
+    setError(null)
+    try {
+      const res = await fetch('/api/admin/announcements', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id }),
+      })
+      const json = await res.json()
+      if (res.ok) {
+        setAnnouncements(prev => prev.filter(a => a.id !== id))
+      } else {
+        setError('Delete failed: ' + (json.error || res.status))
+      }
+    } catch (e) {
+      setError('Delete error: ' + e)
+    } finally {
+      setDeletingId(null)
+      setConfirmId(null)
+    }
   }
 
   const statusColor: Record<string, string> = {
@@ -78,6 +80,11 @@ export default function ManagePostsPage() {
             <p className="text-sm" style={{ color: '#5A5A56' }}>Delete any announcement as admin</p>
           </div>
         </div>
+        {error && (
+          <div className="mb-4 p-3 rounded-lg text-sm" style={{ backgroundColor: '#FEE2E2', color: '#9B1C1C' }}>
+            {error}
+          </div>
+        )}
         {isLoading ? (
           <div className="space-y-4">
             {[1,2,3].map(i => (
@@ -96,19 +103,13 @@ export default function ManagePostsPage() {
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1 flex-wrap">
-                      {ann.category && (
-                        <span className="px-2 py-0.5 text-xs font-semibold rounded-full text-white" style={{ backgroundColor: ann.category.color }}>
-                          {ann.category.name}
-                        </span>
-                      )}
                       <span className="px-2 py-0.5 text-xs font-semibold rounded-full capitalize" style={{ backgroundColor: (statusColor[ann.status] || '#5A5A56') + '20', color: statusColor[ann.status] || '#5A5A56' }}>
                         {ann.status}
                       </span>
                     </div>
                     <p className="font-semibold truncate" style={{ color: '#1A1A18' }}>{ann.title}</p>
                     <p className="text-xs mt-1" style={{ color: '#9A9A95' }}>
-                      {ann.publisher?.full_name ?? 'Unknown'} • {format(new Date(ann.created_at), 'MMM d, yyyy')}
-                      {ann.organization && ' • ' + ann.organization.name}
+                      {format(new Date(ann.created_at), 'MMM d, yyyy')}
                     </p>
                   </div>
                   {confirmId === ann.id ? (
