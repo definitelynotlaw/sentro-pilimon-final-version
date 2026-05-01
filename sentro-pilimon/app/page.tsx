@@ -23,8 +23,7 @@ async function getAnnouncements() {
     .select(`
       *,
       category:event_categories(*),
-      organization:organizations(*),
-      rsvps(rsvp_status)
+      organization:organizations(*)
     `)
     .eq('status', 'published')
     .order('start_datetime', { ascending: true })
@@ -52,8 +51,8 @@ export default async function HomePage() {
     posterZoom: a.poster_zoom || 1,
     category: Array.isArray(a.category) ? a.category[0] : a.category,
     organization: a.organization,
-    goingCount: Array.isArray(a.rsvps) ? a.rsvps.filter((r: {rsvp_status: string}) => r.rsvp_status === 'going').length : 0,
-    interestedCount: Array.isArray(a.rsvps) ? a.rsvps.filter((r: {rsvp_status: string}) => r.rsvp_status === 'interested').length : 0,
+    goingCount: 0,
+    interestedCount: 0,
   }))
 
   return (
