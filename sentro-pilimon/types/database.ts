@@ -80,6 +80,9 @@ export interface Announcement {
   category_id: string
   poster_url?: string | null
   poster_thumbnail_url?: string | null
+  poster_crop_x?: number
+  poster_crop_y?: number
+  poster_zoom?: number
   tags: string[]
   view_count: number
   moderator_remarks?: string | null

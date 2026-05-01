@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { Home, List, ScanLine, Star, User, Settings, LogOut } from 'lucide-react'
+import { Home, List, ScanLine, Star, User, Settings, LogOut, LayoutDashboard } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 
 export function BottomTabBar() {
@@ -15,6 +15,7 @@ export function BottomTabBar() {
   const handleSignOut = async () => {
     setIsMenuOpen(false)
     await signOut()
+    router.push('/')
   }
 
   const publicTabs = [
@@ -22,13 +23,22 @@ export function BottomTabBar() {
     { href: '/channels', label: 'Channels', icon: List },
     { href: '/scan', label: 'Scan', icon: ScanLine },
     { href: '/my-feed', label: 'My Feed', icon: Star },
-    { href: isAuthenticated ? '/profile' : '/login', label: isAuthenticated ? 'Profile' : 'Sign In', icon: User },
   ]
+
+  const handleProfileClick = (e: React.MouseEvent) => {
+    e.preventDefault()
+    if (isAuthenticated) {
+      setIsMenuOpen(true)
+    } else {
+      router.push('/login')
+    }
+  }
 
   return (
     <>
+      {/* Mobile bottom navigation - only show on small screens */}
       <nav
-        className="fixed bottom-0 left-0 right-0 z-50 bg-white md:hidden"
+        className="fixed bottom-0 left-0 right-0 z-50 bg-white lg:hidden"
         style={{ borderTop: '1px solid #D4D4CF' }}
         aria-label="Mobile navigation"
       >
@@ -56,18 +66,35 @@ export function BottomTabBar() {
               </Link>
             )
           })}
+
+          {/* Profile Tab - opens menu on mobile */}
+          <button
+            onClick={handleProfileClick}
+            className="flex flex-col items-center justify-center w-16 h-14 rounded-lg transition-colors"
+            style={{
+              color: pathname === '/profile' ? '#6B0000' : '#5A5A56',
+              backgroundColor: 'transparent',
+            }}
+            aria-label="Profile menu"
+          >
+            <User
+              className="h-5 w-5 mb-1"
+              style={pathname === '/profile' ? { strokeWidth: 2.5 } : {}}
+            />
+            <span className="text-[10px] font-medium">Profile</span>
+          </button>
         </div>
       </nav>
 
-      {/* Mobile user menu modal - only show when authenticated */}
+      {/* Mobile user menu modal */}
       {isHydrated && isAuthenticated && (
         <div
-          className="fixed inset-0 z-50 bg-black/50 md:hidden"
+          className="fixed inset-0 z-50 bg-black/50 lg:hidden"
           style={{ display: isMenuOpen ? 'block' : 'none' }}
           onClick={() => setIsMenuOpen(false)}
         >
           <div
-            className="absolute bottom-16 left-0 right-0 bg-white rounded-t-2xl p-4"
+            className="absolute bottom-16 left-0 right-0 bg-white rounded-t-2xl p-4 max-h-[70vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="w-12 h-1 rounded-full mx-auto mb-4" style={{ backgroundColor: '#D4D4CF' }} />
@@ -83,32 +110,52 @@ export function BottomTabBar() {
                 <p className="text-xs capitalize" style={{ color: '#9A9A95' }}>{profile?.role}</p>
               </div>
             </div>
-            <Link
-              href="/dashboard"
-              className="flex items-center gap-3 w-full p-3 rounded-lg transition-colors hover-lift"
-              style={{ color: '#1A1A18' }}
-              onClick={() => setIsMenuOpen(false)}
-            >
-              <User className="h-5 w-5" />
-              <span className="font-medium">Dashboard</span>
-            </Link>
-            <Link
-              href="/settings/account"
-              className="flex items-center gap-3 w-full p-3 rounded-lg transition-colors hover-lift"
-              style={{ color: '#1A1A18' }}
-              onClick={() => setIsMenuOpen(false)}
-            >
-              <Settings className="h-5 w-5" />
-              <span className="font-medium">Account Settings</span>
-            </Link>
-            <button
-              onClick={handleSignOut}
-              className="flex items-center gap-3 w-full p-3 rounded-lg transition-colors hover-lift"
-              style={{ color: '#9B1C1C' }}
-            >
-              <LogOut className="h-5 w-5" />
-              <span className="font-medium">Sign Out</span>
-            </button>
+            <div className="space-y-1">
+              <Link
+                href="/dashboard"
+                className="flex items-center gap-3 w-full p-3 rounded-lg transition-colors"
+                style={{ color: '#1A1A18' }}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                <LayoutDashboard className="h-5 w-5" />
+                <span className="font-medium">Dashboard</span>
+              </Link>
+              <Link
+                href="/profile"
+                className="flex items-center gap-3 w-full p-3 rounded-lg transition-colors"
+                style={{ color: '#1A1A18' }}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                <User className="h-5 w-5" />
+                <span className="font-medium">My Profile</span>
+              </Link>
+              <Link
+                href="/my-rsvps"
+                className="flex items-center gap-3 w-full p-3 rounded-lg transition-colors"
+                style={{ color: '#1A1A18' }}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                <Star className="h-5 w-5" />
+                <span className="font-medium">My RSVPs</span>
+              </Link>
+              <Link
+                href="/settings/account"
+                className="flex items-center gap-3 w-full p-3 rounded-lg transition-colors"
+                style={{ color: '#1A1A18' }}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                <Settings className="h-5 w-5" />
+                <span className="font-medium">Account Settings</span>
+              </Link>
+              <button
+                onClick={handleSignOut}
+                className="flex items-center gap-3 w-full p-3 rounded-lg transition-colors"
+                style={{ color: '#9B1C1C' }}
+              >
+                <LogOut className="h-5 w-5" />
+                <span className="font-medium">Sign Out</span>
+              </button>
+            </div>
           </div>
         </div>
       )}

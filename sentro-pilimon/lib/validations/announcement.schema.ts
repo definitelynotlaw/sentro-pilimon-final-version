@@ -21,8 +21,8 @@ export const announcementFormSchema = z.object({
   venue: z.string().max(500, 'Venue too long').optional(),
   poster_url: z.string().url().or(z.literal('')).optional().nullable(),
   tags: z.array(z.string()).max(10, 'Maximum 10 tags').optional(),
-  org_id: z.string().uuid('Invalid organization').optional().nullable(),
-  office_id: z.string().uuid('Invalid office').optional().nullable(),
+  org_id: z.string().optional().nullable(),
+  office_id: z.string().optional().nullable(),
 }).refine(
   (data) => new Date(data.end_datetime) > new Date(data.start_datetime),
   { message: 'End date must be after start date', path: ['end_datetime'] }

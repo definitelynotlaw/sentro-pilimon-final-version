@@ -14,7 +14,6 @@ export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('')
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
-  const [showDemoBypass, setShowDemoBypass] = useState(false)
 
   // Redirect if already logged in
   useEffect(() => {
@@ -32,9 +31,20 @@ export default function ForgotPasswordPage() {
     setIsLoading(true)
     setError('')
 
+    const normalizedEmail = email.trim().toLowerCase()
+    if (!normalizedEmail.endsWith('@plmun.edu.ph')) {
+      setError('Only @plmun.edu.ph accounts can request a password reset')
+      setIsLoading(false)
+      return
+    }
+
     try {
-      const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth/reset-password`,
+      const redirectTo = process.env.NEXT_PUBLIC_APP_URL
+        ? `${process.env.NEXT_PUBLIC_APP_URL}/auth/reset-password`
+        : `${window.location.origin}/auth/reset-password`
+
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(normalizedEmail, {
+        redirectTo,
       })
 
       if (resetError) {
@@ -42,31 +52,6 @@ export default function ForgotPasswordPage() {
       } else {
         setSuccess(true)
       }
-    } catch {
-      setError('An unexpected error occurred')
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const handleDemoBypass = async () => {
-    // This is a demo bypass - in production, this would not exist
-    // It allows demo users to reset password without email
-    setIsLoading(true)
-    setError('')
-
-    try {
-      // First, check if user exists by trying to get them
-      const { data: { user }, error: getError } = await supabase.auth.api.getUserByEmail(email)
-
-      if (getError || !user) {
-        setError('No account found with this email. Please register first.')
-        setIsLoading(false)
-        return
-      }
-
-      // User exists - redirect to demo reset page
-      router.push(`/auth/reset-password?demo=true&email=${encodeURIComponent(email)}`)
     } catch {
       setError('An unexpected error occurred')
     } finally {
@@ -213,38 +198,6 @@ export default function ForgotPasswordPage() {
               )}
             </button>
           </form>
-
-          {/* Demo bypass toggle */}
-          <div className="mt-4 pt-4 border-t" style={{ borderColor: '#EBEBEA' }}>
-            <button
-              type="button"
-              onClick={() => setShowDemoBypass(!showDemoBypass)}
-              className="w-full text-sm text-center hover-lift"
-              style={{ color: '#9A9A95' }}
-            >
-              {showDemoBypass ? 'Hide' : 'Show'} demo options
-            </button>
-
-            {showDemoBypass && (
-              <div className="mt-4 p-4 rounded-lg" style={{ backgroundColor: '#FDF6E3' }}>
-                <p className="text-sm mb-3" style={{ color: '#5A5A56' }}>
-                  <strong>Demo Mode:</strong> If you're testing and didn't receive an email, use the button below to simulate the reset flow.
-                </p>
-                <button
-                  type="button"
-                  onClick={handleDemoBypass}
-                  disabled={isLoading || !email}
-                  className="w-full py-2 text-sm font-medium rounded-lg transition-colors hover-lift"
-                  style={{
-                    backgroundColor: '#C9972C',
-                    color: 'white',
-                  }}
-                >
-                  Demo: Simulate Reset Email Sent
-                </button>
-              </div>
-            )}
-          </div>
 
           {/* Back to Sign In */}
           <div className="mt-6 text-center">

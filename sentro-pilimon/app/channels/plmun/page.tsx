@@ -5,6 +5,7 @@ import { TopNavBar } from '@/components/navigation/TopNavBar'
 import { PLMunLogo } from '@/components/shared/PLMunLogo'
 import { BulletinGrid } from '@/components/bulletin/BulletinGrid'
 import { AnnouncementCardProps } from '@/components/bulletin/AnnouncementCard'
+import { FollowButton } from '@/components/channels/FollowButton'
 
 async function getPLMunAnnouncements() {
   const supabase = await createClient()
@@ -13,7 +14,7 @@ async function getPLMunAnnouncements() {
   const { data: announcements } = await supabase
     .from('announcements')
     .select(`
-      id, title, description, start_datetime, end_datetime, venue, poster_url, status,
+      id, title, description, start_datetime, end_datetime, venue, poster_url, poster_crop_x, poster_crop_y, poster_zoom, status,
       category:event_categories(id, name, slug, color)
     `)
     .is('org_id', null)
@@ -26,6 +27,8 @@ async function getPLMunAnnouncements() {
 }
 
 export default async function PLMunChannelPage() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
   const announcements = await getPLMunAnnouncements()
 
   const announcementCards: AnnouncementCardProps[] = announcements.map(a => ({
@@ -36,6 +39,9 @@ export default async function PLMunChannelPage() {
     endDate: new Date(a.end_datetime),
     venue: a.venue,
     posterUrl: a.poster_url,
+    posterCropX: a.poster_crop_x || 0,
+    posterCropY: a.poster_crop_y || 0,
+    posterZoom: a.poster_zoom || 1,
     category: Array.isArray(a.category) ? a.category[0] : a.category,
     organization: null,
     goingCount: 0,
@@ -58,6 +64,12 @@ export default async function PLMunChannelPage() {
           <h1 className="text-2xl font-bold">PLMun General</h1>
           <p className="text-sm opacity-80">Official campus-wide announcements</p>
         </div>
+      </div>
+
+      {/* Description + Follow */}
+      <div className="max-w-4xl mx-auto px-4 py-6">
+        <p className="text-center mb-4" style={{ color: '#5A5A56' }}>Official campus-wide announcements from PLMun administration</p>
+        {user && <div className="flex justify-center"><FollowButton channelType="plmun" channelId={null} userId={user.id} /></div>}
       </div>
 
       {/* Announcements */}

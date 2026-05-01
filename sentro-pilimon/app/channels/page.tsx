@@ -113,7 +113,7 @@ export default function ChannelsPage() {
 
         {/* Pilimon Bulletin */}
         <Link
-          href="/channels/plmun"
+          href="/"
           className="block mb-8 p-6 rounded-xl text-white transition-transform hover:scale-[1.01]"
           style={{ backgroundColor: '#6B0000' }}
         >

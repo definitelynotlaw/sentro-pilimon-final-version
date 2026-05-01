@@ -6,22 +6,50 @@ export default function AboutPage() {
   return (
     <main className="min-h-screen pb-20 md:pb-0">
       {/* Header */}
-      <div
-        className="py-8 px-4"
-        style={{ backgroundColor: '#6B0000' }}
-      >
-        <div className="max-w-4xl mx-auto text-center text-white">
-          <Link href="/" className="inline-block mb-4">
-            <PLMunLogo size="xl" />
-          </Link>
-          <h1
-            className="text-2xl md:text-3xl font-bold mb-2"
-            style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
-          >
-            {COPY.appName}
-          </h1>
-          <p className="text-sm opacity-80">{COPY.appTagline}</p>
-        </div>
+      <div className="py-6 px-4">
+        <Link
+          href="/"
+          className="block max-w-4xl mx-auto p-6 rounded-xl text-white transition-transform hover:scale-[1.01]"
+          style={{ backgroundColor: '#6B0000' }}
+        >
+          <div className="flex items-center gap-4">
+            <div className="flex-shrink-0">
+              <PLMunLogo size="lg" />
+            </div>
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-1">
+                <h1
+                  className="text-xl font-bold"
+                  style={{ fontFamily: "'Playfair Display', Georgia, serif" }}
+                >
+                  {COPY.appName}
+                </h1>
+                <span
+                  className="px-2 py-0.5 text-xs font-medium rounded-full"
+                  style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)' }}
+                >
+                  Official
+                </span>
+              </div>
+              <p className="text-sm opacity-80">{COPY.appTagline}</p>
+            </div>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="h-5 w-5 opacity-60"
+              aria-hidden="true"
+            >
+              <path d="m9 18 6-6-6-6" />
+            </svg>
+          </div>
+        </Link>
       </div>
 
       {/* Content */}

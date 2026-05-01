@@ -1,29 +1,93 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { Camera, X, Link } from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
+import { Camera, X, Link, Loader2 } from 'lucide-react'
+import { Html5Qrcode } from 'html5-qrcode'
 
 export default function ScanPage() {
   const router = useRouter()
-  const supabase = createClient()
   const [isSupported, setIsSupported] = useState(true)
+  const [isScanning, setIsScanning] = useState(false)
   const [manualUrl, setManualUrl] = useState('')
   const [error, setError] = useState('')
+  const [cameraError, setCameraError] = useState('')
+  const scannerRef = useRef<Html5Qrcode | null>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    // Check camera support
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
       setIsSupported(false)
     }
+
+    return () => {
+      if (scannerRef.current) {
+        scannerRef.current.stop().catch(() => {})
+      }
+    }
   }, [])
+
+  const startScanner = async () => {
+    if (!containerRef.current) return
+
+    try {
+      setError('')
+      setCameraError('')
+      setIsScanning(true)
+
+      const scanner = new Html5Qrcode('qr-reader')
+      scannerRef.current = scanner
+
+      await scanner.start(
+        { facingMode: 'environment' },
+        {
+          fps: 10,
+          qrbox: { width: 200, height: 200 },
+        },
+        (decodedText) => {
+          // Extract announcement ID from URL or use directly
+          const match = decodedText.match(/announcement\/([a-f0-9-]+)/i)
+          if (match) {
+            scanner.stop().then(() => {
+              router.push(`/announcement/${match[1]}`)
+            })
+          } else if (decodedText.startsWith('/announcement/')) {
+            scanner.stop().then(() => {
+              router.push(decodedText)
+            })
+          } else {
+            setError('Invalid QR code. This is not a Sentro Pilimon QR code.')
+          }
+        },
+        () => {} // Ignore errors during scanning
+      )
+    } catch (err) {
+      setIsScanning(false)
+      if (err instanceof Error) {
+        if (err.message.includes('permission')) {
+          setCameraError('Camera permission denied. Please allow camera access.')
+        } else if (err.message.includes('NotFoundError')) {
+          setCameraError('No camera found on this device.')
+        } else {
+          setCameraError('Could not start camera. Try manual entry below.')
+        }
+      }
+    }
+  }
+
+  const stopScanner = async () => {
+    if (scannerRef.current) {
+      try {
+        await scannerRef.current.stop()
+      } catch {}
+    }
+    setIsScanning(false)
+  }
 
   const handleManualSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
 
-    // Extract announcement ID from URL
     const url = manualUrl.trim()
     const match = url.match(/announcement\/([a-f0-9-]+)/i)
     if (match) {
@@ -49,39 +113,66 @@ export default function ScanPage() {
           className="relative w-full aspect-square max-w-sm mx-auto rounded-2xl overflow-hidden mb-6"
           style={{ backgroundColor: '#2C2C2A' }}
         >
-          {isSupported ? (
+          <div id="qr-reader" ref={containerRef} className="w-full h-full" />
+
+          {!isScanning && !cameraError && (
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="text-center text-white">
                 <Camera className="h-16 w-16 mx-auto mb-4 opacity-50" />
-                <p className="text-sm opacity-70">Camera not available in demo</p>
-              </div>
-            </div>
-          ) : (
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="text-center text-white p-6">
-                <X className="h-16 w-16 mx-auto mb-4" style={{ color: '#9B1C1C' }} />
-                <p className="text-lg font-semibold mb-2">Camera Not Supported</p>
-                <p className="text-sm opacity-70">Use manual URL entry below</p>
+                <p className="text-sm opacity-70 mb-4">Camera not active</p>
+                {isSupported && (
+                  <button
+                    onClick={startScanner}
+                    className="px-6 py-3 rounded-lg font-medium"
+                    style={{ backgroundColor: '#6B0000', color: 'white' }}
+                  >
+                    Start Scanner
+                  </button>
+                )}
               </div>
             </div>
           )}
 
+          {isScanning && (
+            <button
+              onClick={stopScanner}
+              className="absolute top-3 right-3 p-2 rounded-full z-10"
+              style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
+            >
+              <X className="h-5 w-5 text-white" />
+            </button>
+          )}
+
           {/* QR Frame Overlay */}
           <div
-            className="absolute inset-0 border-4 border-transparent"
+            className="absolute pointer-events-none"
             style={{
-              borderImage: 'linear-gradient(45deg, #C9972C 0%, #C9972C 100%) 1',
-              margin: '40px',
-              borderRadius: '20px',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: '200px',
+              height: '200px',
             }}
           >
-            {/* Corner brackets */}
             <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 rounded-tl-xl" style={{ borderColor: '#C9972C' }} />
             <div className="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 rounded-tr-xl" style={{ borderColor: '#C9972C' }} />
             <div className="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 rounded-bl-xl" style={{ borderColor: '#C9972C' }} />
             <div className="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 rounded-br-xl" style={{ borderColor: '#C9972C' }} />
           </div>
         </div>
+
+        {/* Error messages */}
+        {cameraError && (
+          <p className="text-center text-sm mb-4 px-4 py-2 rounded-lg" style={{ backgroundColor: 'rgba(155, 28, 28, 0.2)', color: '#F87171' }}>
+            {cameraError}
+          </p>
+        )}
+
+        {error && (
+          <p className="text-center text-sm mb-4" style={{ color: '#F87171' }}>
+            {error}
+          </p>
+        )}
 
         {/* Instruction */}
         <p className="text-center text-sm mb-6" style={{ color: '#9A9A95' }}>
@@ -122,9 +213,6 @@ export default function ScanPage() {
                 Go
               </button>
             </div>
-            {error && (
-              <p className="text-xs mt-2 text-center" style={{ color: '#9B1C1C' }}>{error}</p>
-            )}
           </form>
         </div>
       </div>

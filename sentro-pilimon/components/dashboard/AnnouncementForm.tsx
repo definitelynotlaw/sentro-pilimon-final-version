@@ -1,13 +1,14 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Upload, X, Loader2 } from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
+import { Upload, X, Loader2, CheckCircle, ArrowLeft } from 'lucide-react'
 import { announcementFormSchema, type AnnouncementFormData } from '@/lib/validations/announcement.schema'
+import { PosterCropper } from './PosterCropper'
 
 interface Category {
   id: string
@@ -25,22 +26,25 @@ interface Organization {
 interface AnnouncementFormProps {
   categories: Category[]
   organizations: Organization[]
-  initialData?: Partial<AnnouncementFormData>
-  onSubmit?: (data: AnnouncementFormData) => Promise<{ success: boolean; error?: string }>
+  initialData?: Partial<AnnouncementFormData & { id?: string }>
 }
 
 export function AnnouncementForm({
   categories,
   organizations,
   initialData,
-  onSubmit,
 }: AnnouncementFormProps) {
+  const isEditing = !!initialData?.id
   const router = useRouter()
-  const supabase = createClient()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [posterPreview, setPosterPreview] = useState<string | null>(initialData?.poster_url || null)
   const [isUploading, setIsUploading] = useState(false)
   const [successMessage, setSuccessMessage] = useState('')
+  const [posterCrop, setPosterCrop] = useState({
+    x: initialData?.poster_crop_x || 0,
+    y: initialData?.poster_crop_y || 0,
+    zoom: initialData?.poster_zoom || 1,
+  })
 
   const {
     register,
@@ -90,6 +94,7 @@ export function AnnouncementForm({
 
       setPosterPreview(result.url)
       setValue('poster_url', result.url)
+      setPosterCrop({ x: 0, y: 0, zoom: 1 })
     } catch (err) {
       console.error('Upload error:', err)
     } finally {
@@ -98,10 +103,12 @@ export function AnnouncementForm({
   }
 
   const processSubmit = async (data: AnnouncementFormData) => {
+    console.log('Form submitted with:', data)
     setIsSubmitting(true)
+    setSuccessMessage('')
     try {
-      // Clean up empty strings
       const cleanedData = {
+        ...(isEditing && { id: initialData.id }),
         title: data.title,
         description: data.description,
         category_id: data.category_id,
@@ -109,11 +116,14 @@ export function AnnouncementForm({
         end_datetime: data.end_datetime,
         venue: data.venue || '',
         poster_url: data.poster_url || null,
+        poster_crop_x: posterCrop.x,
+        poster_crop_y: posterCrop.y,
+        poster_zoom: posterCrop.zoom,
         org_id: data.org_id || null,
       }
 
       const response = await fetch('/api/announcements', {
-        method: 'POST',
+        method: isEditing ? 'PATCH' : 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(cleanedData),
       })
@@ -121,17 +131,19 @@ export function AnnouncementForm({
       const result = await response.json()
 
       if (result.success) {
-        setSuccessMessage('Announcement created successfully! Redirecting...')
-        setTimeout(() => {
-          router.push('/dashboard/officer')
-          router.refresh()
-        }, 1500)
+        setSuccessMessage(isEditing ? 'Announcement updated successfully!' : 'Announcement created successfully! Redirecting...')
+        if (!isEditing) {
+          setTimeout(() => {
+            router.push('/dashboard/officer')
+            router.refresh()
+          }, 1500)
+        }
       } else {
-        alert(result.error || 'Failed to create announcement')
+        alert(result.error || `Failed to ${isEditing ? 'update' : 'create'} announcement`)
       }
     } catch (err) {
       console.error('Submit error:', err)
-      alert('An error occurred while creating the announcement')
+      alert('An error occurred while submitting the announcement')
     } finally {
       setIsSubmitting(false)
     }
@@ -142,13 +154,21 @@ export function AnnouncementForm({
       {/* Success Message */}
       {successMessage && (
         <div
-          className="p-4 rounded-lg text-sm flex items-center gap-2"
+          className="p-4 rounded-lg text-sm"
           style={{ backgroundColor: '#EDF7F0', color: '#1A6B3C', border: '1px solid #1A6B3C' }}
         >
-          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-          </svg>
-          {successMessage}
+          <div className="flex items-center gap-3 mb-3">
+            <CheckCircle className="h-5 w-5" />
+            <span className="font-medium">{successMessage}</span>
+          </div>
+          <Link
+            href="/dashboard/officer"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+            style={{ backgroundColor: '#1A6B3C', color: 'white' }}
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Go to My Posts
+          </Link>
         </div>
       )}
 
@@ -235,11 +255,10 @@ export function AnnouncementForm({
           style={{ borderColor: '#D4D4CF', backgroundColor: posterPreview ? 'transparent' : '#FAFAF7' }}
         >
           {posterPreview ? (
-            <div className="relative">
-              <img
-                src={posterPreview}
-                alt="Poster preview"
-                className="max-h-48 mx-auto rounded-lg object-contain"
+            <div className="space-y-3">
+              <PosterCropper
+                imageUrl={posterPreview}
+                onCropChange={setPosterCrop}
               />
               <button
                 type="button"
@@ -247,10 +266,11 @@ export function AnnouncementForm({
                   setPosterPreview(null)
                   setValue('poster_url', undefined)
                 }}
-                className="absolute -top-2 -right-2 w-8 h-8 rounded-full flex items-center justify-center"
+                className="px-4 py-2 rounded-lg flex items-center gap-2 mx-auto"
                 style={{ backgroundColor: '#9B1C1C', color: 'white' }}
               >
                 <X className="h-4 w-4" />
+                Remove Image
               </button>
             </div>
           ) : (

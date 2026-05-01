@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/server'
 import { BottomTabBar } from '@/components/navigation/BottomTabBar'
 import { TopNavBar } from '@/components/navigation/TopNavBar'
 import { AnnouncementForm } from '@/components/dashboard/AnnouncementForm'
+import { allOrganizations } from '@/data/organizations'
 
 interface Category {
   id: string
@@ -35,7 +36,7 @@ async function getFormData(announcementId: string) {
     .select('id, name, slug, color')
     .order('sort_order')
 
-  const { data: organizations } = await supabase
+  const { data: dbOrganizations } = await supabase
     .from('organizations')
     .select('id, name, slug')
     .eq('status', 'active')
@@ -47,15 +48,17 @@ async function getFormData(announcementId: string) {
     .eq('status', 'active')
     .order('name')
 
-  const allOrgs = [
-    ...(organizations || []).map(o => ({ id: o.id, name: o.name, slug: o.slug })),
-    ...(offices || []).map(o => ({ id: o.id, name: o.name, slug: o.slug })),
-  ]
+  // Combine static orgs + database orgs + offices, deduped by id
+  const allOrgs: Organization[] = [
+    ...allOrganizations, // Static data: student councils, dept orgs, university orgs, service offices
+    ...(dbOrganizations || []).filter(o => !allOrganizations.some(ao => ao.id === o.id)), // DB orgs not in static
+    ...(offices || []).filter(o => !allOrganizations.some(ao => ao.id === o.id)).map(o => ({ id: o.id, name: o.name, slug: o.slug })), // Offices not in static
+  ].sort((a, b) => a.name.localeCompare(b.name))
 
   return {
     announcement,
     categories: (categories || []) as Category[],
-    organizations: allOrgs as Organization[],
+    organizations: allOrgs,
   }
 }
 
@@ -76,6 +79,9 @@ async function updateAnnouncement(id: string, formData: any) {
       end_datetime: formData.end_datetime,
       venue: formData.venue || null,
       poster_url: formData.poster_url || null,
+      poster_crop_x: formData.poster_crop_x || 0,
+      poster_crop_y: formData.poster_crop_y || 0,
+      poster_zoom: formData.poster_zoom || 1,
       org_id: formData.org_id || null,
     })
     .eq('id', id)
@@ -121,6 +127,7 @@ export default async function EditAnnouncementPage({ params }: PageProps) {
   }
 
   const initialData = {
+    id: id,
     title: data.announcement.title,
     description: data.announcement.description,
     category_id: data.announcement.category_id,
@@ -128,6 +135,9 @@ export default async function EditAnnouncementPage({ params }: PageProps) {
     end_datetime: data.announcement.end_datetime.slice(0, 16),
     venue: data.announcement.venue || undefined,
     poster_url: data.announcement.poster_url || undefined,
+    poster_crop_x: data.announcement.poster_crop_x,
+    poster_crop_y: data.announcement.poster_crop_y,
+    poster_zoom: data.announcement.poster_zoom,
     org_id: data.announcement.org_id || undefined,
   }
 
@@ -160,7 +170,6 @@ export default async function EditAnnouncementPage({ params }: PageProps) {
             categories={data.categories}
             organizations={data.organizations}
             initialData={initialData}
-            onSubmit={(formData) => updateAnnouncement(id, formData)}
           />
         </div>
       </div>

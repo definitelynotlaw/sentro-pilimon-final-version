@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from 'react'
 import Link from 'next/link'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { PLMunLogo } from '@/components/shared/PLMunLogo'
 import { Lock, Loader2, CheckCircle, AlertCircle } from 'lucide-react'
@@ -14,32 +14,19 @@ function ResetPasswordContent() {
   const searchParams = useSearchParams()
   const supabase = createClient()
 
-  const isDemoMode = searchParams.get('demo') === 'true'
-  const demoEmail = searchParams.get('email')
-
-  const [isLoading, setIsLoading] = useState(!isDemoMode)
-  const [isVerified, setIsVerified] = useState(isDemoMode)
+  const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
-  const [email, setEmail] = useState(demoEmail || '')
-  const [token, setToken] = useState<string | null>(null)
-  const [isDemoEmailValid, setIsDemoEmailValid] = useState(false)
 
   const { password: newPassword, setPassword, strength, requirements, isValid } = usePasswordStrength()
 
   useEffect(() => {
-    if (isDemoMode) {
-      // Demo mode - skip token validation
-      setIsLoading(false)
-      setIsVerified(true)
-      return
-    }
-
-    // Get the token from the URL hash (Supabase sends token in hash)
+    // Get the token from the URL hash or the query params
     const hashParams = new URLSearchParams(window.location.hash.slice(1))
-    const accessToken = hashParams.get('access_token')
-    const refreshToken = hashParams.get('refresh_token')
+    const queryParams = new URLSearchParams(window.location.search)
+    const accessToken = hashParams.get('access_token') || queryParams.get('access_token')
+    const refreshToken = hashParams.get('refresh_token') || queryParams.get('refresh_token')
 
     if (accessToken) {
       supabase.auth.setSession({
@@ -55,32 +42,7 @@ function ResetPasswordContent() {
       setError('Invalid reset link. Please request a new one.')
       setIsLoading(false)
     }
-  }, [supabase, isDemoMode])
-
-  const handleDemoEmailVerify = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setError('')
-
-    try {
-      // Check if user exists by trying to get user metadata
-      const { data: { user }, error: getError } = await supabase.auth.api.getUserByEmail(email)
-
-      if (getError || !user) {
-        setError('No account found with this email address.')
-        setIsLoading(false)
-        return
-      }
-
-      // User exists - allow demo reset
-      setIsDemoEmailValid(true)
-      setIsVerified(true)
-      setIsLoading(false)
-    } catch {
-      setError('An unexpected error occurred')
-      setIsLoading(false)
-    }
-  }
+  }, [supabase])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -88,28 +50,14 @@ function ResetPasswordContent() {
     setError('')
 
     try {
-      if (isDemoMode && isDemoEmailValid) {
-        // Demo mode: directly update password for the email
-        const { error: updateError } = await supabase.auth.api.updateUserByEmail(email, {
-          password: newPassword,
-        })
+      const { error: updateError } = await supabase.auth.updateUser({
+        password: newPassword,
+      })
 
-        if (updateError) {
-          setError(updateError.message)
-        } else {
-          setSuccess(true)
-        }
+      if (updateError) {
+        setError(updateError.message)
       } else {
-        // Normal mode: update current user's password
-        const { error: updateError } = await supabase.auth.updateUser({
-          password: newPassword,
-        })
-
-        if (updateError) {
-          setError(updateError.message)
-        } else {
-          setSuccess(true)
-        }
+        setSuccess(true)
       }
     } catch {
       setError('An unexpected error occurred')
@@ -122,12 +70,12 @@ function ResetPasswordContent() {
     return (
       <div className="w-full max-w-md text-center py-20">
         <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" style={{ color: '#6B0000' }} />
-        <p style={{ color: '#5A5A56' }}>{isDemoMode ? 'Verifying...' : 'Verifying reset link...'}</p>
+        <p style={{ color: '#5A5A56' }}>Verifying reset link...</p>
       </div>
     )
   }
 
-  if (error && !isVerified) {
+  if (error && !success) {
     return (
       <main
         className="min-h-screen flex flex-col items-center justify-center p-4"
@@ -213,102 +161,6 @@ function ResetPasswordContent() {
     )
   }
 
-  // Demo mode: require email verification first
-  if (isDemoMode && !isDemoEmailValid) {
-    return (
-      <main
-        className="min-h-screen flex flex-col items-center justify-center p-4"
-        style={{ backgroundColor: '#FAFAF7' }}
-      >
-        <div className="w-full max-w-md">
-          <div className="flex flex-col items-center mb-8">
-            <Link href="/"><PLMunLogo size="xl" className="mb-4 hover-lift" /></Link>
-            <div
-              className="w-12 h-12 rounded-full flex items-center justify-center mb-4"
-              style={{ backgroundColor: '#FDF6E3' }}
-            >
-              <Lock className="h-6 w-6" style={{ color: '#C9972C' }} />
-            </div>
-            <h1
-              className="text-2xl font-bold"
-              style={{ color: '#6B0000', fontFamily: "'Playfair Display', Georgia, serif" }}
-            >
-              Demo Mode - Reset Password
-            </h1>
-            <p className="text-sm mt-1" style={{ color: '#5A5A56' }}>
-              Enter your email to reset your password
-            </p>
-          </div>
-
-          <div
-            className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6"
-          >
-            <p className="text-sm" style={{ color: '#7B3F00' }}>
-              <strong>Demo Notice:</strong> Since email is not working, enter your registered email below to reset your password directly.
-            </p>
-          </div>
-
-          <form onSubmit={handleDemoEmailVerify} className="space-y-4">
-            <div>
-              <label
-                htmlFor="demoEmail"
-                className="block text-sm font-medium mb-1"
-                style={{ color: '#5A5A56' }}
-              >
-                Your Email
-              </label>
-              <input
-                id="demoEmail"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="your@email.com"
-                className="w-full px-4 py-3 rounded-lg text-base"
-                style={{
-                  border: '1px solid #D4D4CF',
-                  outline: 'none',
-                }}
-                required
-              />
-            </div>
-
-            {error && (
-              <div
-                className="p-3 rounded-lg text-sm flex items-center gap-2"
-                style={{
-                  backgroundColor: '#FEF2F2',
-                  border: '1px solid #FECACA',
-                  color: '#9B1C1C',
-                }}
-              >
-                <AlertCircle className="h-5 w-5 flex-shrink-0" />
-                <span>{error}</span>
-              </div>
-            )}
-
-            <button
-              type="submit"
-              className="w-full py-3 text-white font-medium rounded-lg hover-lift"
-              style={{ backgroundColor: '#C9972C' }}
-            >
-              Verify Email
-            </button>
-          </form>
-
-          <div className="mt-6 text-center">
-            <Link
-              href="/login"
-              className="text-sm hover-lift"
-              style={{ color: '#5A5A56' }}
-            >
-              ← Back to Sign In
-            </Link>
-          </div>
-        </div>
-      </main>
-    )
-  }
-
   return (
     <main
       className="min-h-screen flex flex-col items-center justify-center p-4"
@@ -324,7 +176,7 @@ function ResetPasswordContent() {
             Set New Password
           </h1>
           <p className="text-sm mt-1" style={{ color: '#5A5A56' }}>
-            {isDemoMode ? `Resetting password for ${email}` : 'Enter your new password below'}
+            Enter your new password below
           </p>
         </div>
 

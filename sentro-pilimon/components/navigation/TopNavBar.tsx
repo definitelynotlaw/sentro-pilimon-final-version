@@ -48,23 +48,23 @@ export function TopNavBar() {
 
   return (
     <header
-      className="hidden md:block sticky top-0 z-40 bg-white"
-      style={{ borderBottom: '1px solid #D4D4CF' }}
+      className="sticky top-0 z-40"
+      style={{ backgroundColor: '#6B0000', borderBottom: '2px solid #1A1A18' }}
     >
-      <div className="flex items-center justify-between h-16 px-6">
-        {/* Left: Logo + Nav */}
-        <div className="flex items-center gap-8">
-          <Link href="/" className="flex items-center gap-3 hover-lift" style={{ opacity: 0.8 }}>
+      <div className="flex items-center justify-between h-14 px-4 md:h-16 md:px-6">
+        {/* Left: Logo + Nav (desktop only) */}
+        <div className="flex items-center gap-4 md:gap-8">
+          <Link href="/" className="hidden md:flex items-center gap-2 md:gap-3">
             <PLMunLogo size="sm" />
             <span
-              className="font-display text-xl font-bold"
-              style={{ color: '#6B0000', fontFamily: "'Playfair Display', Georgia, serif" }}
+              className="font-display text-base md:text-xl font-bold"
+              style={{ color: 'white', fontFamily: "'Playfair Display', Georgia, serif" }}
             >
               Sentro Pilimon
             </span>
           </Link>
 
-          <nav className="flex items-center gap-6" aria-label="Main navigation">
+          <nav className="hidden md:flex items-center gap-6" aria-label="Main navigation">
             {navLinks.map((link) => {
               const isActive = pathname === link.href ||
                 (link.href !== '/' && pathname.startsWith(link.href))
@@ -75,7 +75,7 @@ export function TopNavBar() {
                   href={link.href}
                   className="text-sm font-medium transition-colors relative py-2 nav-link"
                   style={{
-                    color: isActive ? '#6B0000' : '#5A5A56',
+                    color: isActive ? '#C9972C' : 'rgba(255,255,255,0.8)',
                   }}
                   aria-current={isActive ? 'page' : undefined}
                 >
@@ -95,38 +95,52 @@ export function TopNavBar() {
           </nav>
         </div>
 
+        {/* Center: Logo + Text (mobile only) */}
+        <div className="flex md:hidden absolute left-1/2 -translate-x-1/2">
+          <Link href="/" className="flex items-center gap-2">
+            <PLMunLogo size="sm" />
+            <span
+              className="font-display text-base font-bold"
+              style={{ color: 'white', fontFamily: "'Playfair Display', Georgia, serif" }}
+            >
+              Sentro Pilimon
+            </span>
+          </Link>
+        </div>
+
         {/* Right: Search + Actions */}
-        <div className="flex items-center gap-4">
-          <div className="relative">
+        <div className="flex items-center gap-2 md:gap-4">
+          <div className="hidden md:block relative">
             <Search
               className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4"
-              style={{ color: '#9A9A95' }}
+              style={{ color: 'rgba(255,255,255,0.5)' }}
             />
             <input
               type="search"
               placeholder="Search announcements..."
               className="w-64 pl-10 pr-4 py-2 rounded-lg text-sm"
               style={{
-                backgroundColor: '#F5F5F3',
-                border: '1px solid #D4D4CF',
+                backgroundColor: 'rgba(255,255,255,0.1)',
+                border: '1px solid rgba(255,255,255,0.2)',
                 outline: 'none',
+                color: 'white',
               }}
             />
           </div>
 
           {isHydrated && isAuthenticated && profile ? (
-            /* User Menu Dropdown */
-            <div className="relative" ref={menuRef}>
+            /* User Menu Dropdown - hidden on mobile, shown by BottomTabBar */
+            <div className="relative hidden lg:block">
               <button
                 onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                className="flex items-center gap-2 px-3 py-2 rounded-lg transition-colors hover-lift"
-                style={{ backgroundColor: isUserMenuOpen ? '#F5F5F3' : 'transparent' }}
+                className="flex items-center gap-2 px-3 py-2 rounded-lg transition-colors"
+                style={{ backgroundColor: isUserMenuOpen ? 'rgba(255,255,255,0.2)' : 'transparent' }}
                 aria-expanded={isUserMenuOpen}
                 aria-haspopup="true"
               >
                 <div
-                  className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold overflow-hidden"
-                  style={{ backgroundColor: roleColors[profile.role] || '#6B0000' }}
+                  className="w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center text-white text-xs md:text-sm font-bold overflow-hidden"
+                  style={{ backgroundColor: 'rgba(255,255,255,0.2)' }}
                 >
                   {profile.avatar_url ? (
                     <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" />
@@ -134,12 +148,12 @@ export function TopNavBar() {
                     profile.full_name?.charAt(0).toUpperCase() || 'U'
                   )}
                 </div>
-                <span className="text-sm font-medium" style={{ color: '#1A1A18' }}>
+                <span className="hidden sm:inline text-sm font-medium" style={{ color: 'white' }}>
                   {profile.full_name?.split(' ')[0] || 'User'}
                 </span>
                 <ChevronDown
-                  className="h-4 w-4 transition-transform"
-                  style={{ color: '#5A5A56', transform: isUserMenuOpen ? 'rotate(180deg)' : 'none' }}
+                  className="h-4 w-4 transition-transform hidden sm:block"
+                  style={{ color: 'rgba(255,255,255,0.8)', transform: isUserMenuOpen ? 'rotate(180deg)' : 'none' }}
                 />
               </button>
 
@@ -198,23 +212,24 @@ export function TopNavBar() {
               )}
             </div>
           ) : isHydrated ? (
-            <div className="flex items-center gap-3">
+            <div className="hidden lg:flex items-center gap-3">
               <Link
                 href="/login"
-                className="px-4 py-2 text-sm font-medium rounded-lg transition-colors hover-lift"
+                className="px-3 py-2 text-sm font-medium rounded-lg transition-colors"
                 style={{
                   backgroundColor: 'transparent',
-                  color: '#6B0000',
+                  color: 'white',
+                  border: '1px solid rgba(255,255,255,0.4)',
                 }}
               >
                 Sign In
               </Link>
               <Link
                 href="/register"
-                className="px-4 py-2 text-sm font-medium rounded-lg transition-colors hover-lift"
+                className="px-3 py-2 text-sm font-medium rounded-lg transition-colors"
                 style={{
-                  backgroundColor: '#6B0000',
-                  color: 'white',
+                  backgroundColor: 'white',
+                  color: '#6B0000',
                 }}
               >
                 Register
@@ -225,18 +240,45 @@ export function TopNavBar() {
           {/* Mobile menu toggle */}
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="p-2 rounded-lg transition-colors md:hidden"
+            className="p-2 rounded-lg transition-colors hidden"
             style={{ backgroundColor: 'transparent' }}
             aria-label="Open menu"
           >
             {isMenuOpen ? (
-              <X className="h-5 w-5" style={{ color: '#5A5A56' }} />
+              <X className="h-5 w-5" style={{ color: 'white' }} />
             ) : (
-              <Menu className="h-5 w-5" style={{ color: '#5A5A56' }} />
+              <Menu className="h-5 w-5" style={{ color: 'white' }} />
             )}
           </button>
         </div>
       </div>
+
+      {/* Mobile nav menu */}
+      {isMenuOpen && (
+        <div className="md:hidden border-t" style={{ borderColor: '#1A1A18', backgroundColor: '#6B0000' }}>
+          <nav className="flex flex-col p-4 gap-2">
+            {navLinks.map((link) => {
+              const isActive = pathname === link.href ||
+                (link.href !== '/' && pathname.startsWith(link.href))
+
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="px-4 py-3 rounded-lg text-sm font-medium transition-colors"
+                  style={{
+                    color: isActive ? '#C9972C' : 'rgba(255,255,255,0.8)',
+                    backgroundColor: isActive ? 'rgba(255,255,255,0.1)' : 'transparent',
+                  }}
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  {link.label}
+                </Link>
+              )
+            })}
+          </nav>
+        </div>
+      )}
     </header>
   )
 }

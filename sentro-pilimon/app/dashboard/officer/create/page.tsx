@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/server'
 import { BottomTabBar } from '@/components/navigation/BottomTabBar'
 import { TopNavBar } from '@/components/navigation/TopNavBar'
 import { AnnouncementForm } from '@/components/dashboard/AnnouncementForm'
+import { allOrganizations } from '@/data/organizations'
 
 interface Category {
   id: string
@@ -27,7 +28,7 @@ async function getFormData() {
     .select('id, name, slug, color')
     .order('sort_order')
 
-  const { data: organizations } = await supabase
+  const { data: dbOrganizations } = await supabase
     .from('organizations')
     .select('id, name, slug')
     .eq('status', 'active')
@@ -39,77 +40,17 @@ async function getFormData() {
     .eq('status', 'active')
     .order('name')
 
-  const allOrgs = [
-    ...(organizations || []).map(o => ({ id: o.id, name: o.name, slug: o.slug })),
-    ...(offices || []).map(o => ({ id: o.id, name: o.name, slug: o.slug })),
-  ]
+  // Combine static orgs + database orgs + offices, deduped by id
+  const allOrgs: Organization[] = [
+    ...allOrganizations, // Static data: student councils, dept orgs, university orgs, service offices
+    ...(dbOrganizations || []).filter(o => !allOrganizations.some(ao => ao.id === o.id)), // DB orgs not in static
+    ...(offices || []).filter(o => !allOrganizations.some(ao => ao.id === o.id)).map(o => ({ id: o.id, name: o.name, slug: o.slug })), // Offices not in static
+  ].sort((a, b) => a.name.localeCompare(b.name))
 
   return {
     categories: (categories || []) as Category[],
-    organizations: allOrgs as Organization[],
+    organizations: allOrgs,
   }
-}
-
-async function createAnnouncement(formData: any) {
-  'use server'
-  const supabase = await createClient()
-
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { success: false, error: 'Unauthorized' }
-
-  // Determine if this is an org or office
-  let finalOrgId: string | null = null
-  let finalOfficeId: string | null = null
-
-  if (formData.org_id) {
-    // Check if it's an organization
-    const { data: orgCheck } = await supabase
-      .from('organizations')
-      .select('id')
-      .eq('id', formData.org_id)
-      .single()
-
-    if (orgCheck) {
-      finalOrgId = formData.org_id
-    } else {
-      // Check if it's an office
-      const { data: officeCheck } = await supabase
-        .from('offices')
-        .select('id')
-        .eq('id', formData.org_id)
-        .single()
-
-      if (officeCheck) {
-        finalOfficeId = formData.org_id
-      }
-    }
-  }
-
-  const insertData = {
-    title: formData.title,
-    description: formData.description,
-    category_id: formData.category_id,
-    start_datetime: formData.start_datetime,
-    end_datetime: formData.end_datetime,
-    venue: formData.venue || null,
-    poster_url: formData.poster_url || null,
-    publisher_user_id: user.id,
-    org_id: finalOrgId,
-    office_id: finalOfficeId,
-    status: 'draft',
-  }
-
-  const { data, error } = await supabase
-    .from('announcements')
-    .insert(insertData)
-    .select()
-
-  if (error) {
-    console.error('Create error:', error)
-    return { success: false, error: error.message }
-  }
-
-  return { success: true }
 }
 
 export default async function CreateAnnouncementPage() {
@@ -162,7 +103,6 @@ export default async function CreateAnnouncementPage() {
           <AnnouncementForm
             categories={categories}
             organizations={organizations}
-            onSubmit={createAnnouncement}
           />
         </div>
       </div>

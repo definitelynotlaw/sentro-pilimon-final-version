@@ -5,6 +5,7 @@ import { BottomTabBar } from '@/components/navigation/BottomTabBar'
 import { TopNavBar } from '@/components/navigation/TopNavBar'
 import { BulletinGrid } from '@/components/bulletin/BulletinGrid'
 import { AnnouncementCardProps } from '@/components/bulletin/AnnouncementCard'
+import { FollowButton } from '@/components/channels/FollowButton'
 import { getOrgBySlug } from '@/data/organizations'
 
 interface PageProps {
@@ -53,7 +54,7 @@ async function getOrganizationChannel(slug: string): Promise<{ org: Organization
   const { data: announcements } = await supabase
     .from('announcements')
     .select(`
-      id, title, description, start_datetime, end_datetime, venue, poster_url, status,
+      id, title, description, start_datetime, end_datetime, venue, poster_url, poster_crop_x, poster_crop_y, poster_zoom, status,
       category:event_categories(id, name, slug, color)
     `)
     .eq('org_id', org.id)
@@ -66,6 +67,8 @@ async function getOrganizationChannel(slug: string): Promise<{ org: Organization
 
 export default async function OrganizationChannelPage({ params }: PageProps) {
   const { slug } = await params
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
   const data = await getOrganizationChannel(slug)
 
   if (!data) {
@@ -82,6 +85,9 @@ export default async function OrganizationChannelPage({ params }: PageProps) {
     endDate: new Date(a.end_datetime),
     venue: a.venue,
     posterUrl: a.poster_url,
+    posterCropX: a.poster_crop_x || 0,
+    posterCropY: a.poster_crop_y || 0,
+    posterZoom: a.poster_zoom || 1,
     category: Array.isArray(a.category) ? a.category[0] : a.category,
     organization: { name: org.name, logoUrl: org.logo_url },
     goingCount: 0,
@@ -122,10 +128,11 @@ export default async function OrganizationChannelPage({ params }: PageProps) {
         </div>
       </div>
 
-      {/* Description */}
-      {org.short_description && (
+      {/* Description + Follow */}
+      {(org.short_description || user) && (
         <div className="max-w-4xl mx-auto px-4 py-6">
-          <p className="text-center" style={{ color: '#5A5A56' }}>{org.short_description}</p>
+          {org.short_description && <p className="text-center mb-4" style={{ color: '#5A5A56' }}>{org.short_description}</p>}
+          {user && <div className="flex justify-center"><FollowButton channelType="org" channelId={org.id} userId={user.id} /></div>}
         </div>
       )}
 

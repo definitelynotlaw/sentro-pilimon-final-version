@@ -12,11 +12,14 @@ export interface AnnouncementCardProps {
   endDate: Date
   venue?: string | null
   posterUrl?: string | null
-  category: {
+  posterCropX?: number
+  posterCropY?: number
+  posterZoom?: number
+  category?: {
     name: string
     slug: string
     color: string
-  }
+  } | null
   organization?: {
     name: string
     logoUrl?: string | null
@@ -32,8 +35,12 @@ export function AnnouncementCard({
   title,
   description,
   startDate,
+  endDate,
   venue,
   posterUrl,
+  posterCropX = 0,
+  posterCropY = 0,
+  posterZoom = 1,
   category,
   organization,
   goingCount,
@@ -56,21 +63,29 @@ export function AnnouncementCard({
       {/* Poster Image */}
       <div className="relative aspect-[16/9] overflow-hidden" style={{ backgroundColor: '#EBEBEA' }}>
         {posterUrl ? (
-          <Image
-            src={posterUrl}
-            alt={title}
-            fill
-            className="object-cover group-hover:scale-105 transition-transform duration-300"
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-          />
+          <div
+            className="absolute inset-0 overflow-hidden"
+            style={{
+              transform: `translate(${posterCropX}px, ${posterCropY}px) scale(${posterZoom})`,
+              transformOrigin: 'center center',
+            }}
+          >
+            <Image
+              src={posterUrl}
+              alt={title}
+              fill
+              className="object-cover group-hover:scale-105 transition-transform duration-300"
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            />
+          </div>
         ) : (
           <div
             className="absolute inset-0 flex items-center justify-center"
-            style={{ backgroundColor: `${category.color}20` }}
+            style={{ backgroundColor: `${category?.color || '#6B0000'}20` }}
           >
             <span
               className="text-6xl font-bold opacity-30"
-              style={{ color: category.color, fontFamily: "'Playfair Display', Georgia, serif" }}
+              style={{ color: category?.color || '#6B0000', fontFamily: "'Playfair Display', Georgia, serif" }}
             >
               {title.charAt(0)}
             </span>
@@ -78,14 +93,16 @@ export function AnnouncementCard({
         )}
 
         {/* Category Badge */}
-        <div className="absolute top-3 left-3">
-          <span
-            className="px-2 py-1 text-xs font-semibold rounded-full"
-            style={{ backgroundColor: category.color, color: 'white' }}
-          >
-            {category.name}
-          </span>
-        </div>
+        {category && (
+          <div className="absolute top-3 left-3">
+            <span
+              className="px-2 py-1 text-xs font-semibold rounded-full"
+              style={{ backgroundColor: category.color, color: 'white' }}
+            >
+              {category.name}
+            </span>
+          </div>
+        )}
 
         {/* Status Badge (if provided) */}
         {status && (
