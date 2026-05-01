@@ -41,9 +41,9 @@ export function AnnouncementForm({
   const [isUploading, setIsUploading] = useState(false)
   const [successMessage, setSuccessMessage] = useState('')
   const [posterCrop, setPosterCrop] = useState({
-    x: initialData?.poster_crop_x || 0,
-    y: initialData?.poster_crop_y || 0,
-    zoom: initialData?.poster_zoom || 1,
+  poster_crop_x?: number | null,
+  poster_crop_y?: number | null,
+  poster_zoom?: number | null,
   })
 
   const {
