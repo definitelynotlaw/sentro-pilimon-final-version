@@ -23,15 +23,17 @@ interface Organization {
   slug: string
 }
 
+type AnnouncementFormInitialData = Partial<AnnouncementFormData> & {
+  id?: string
+  poster_crop_x?: number | null
+  poster_crop_y?: number | null
+  poster_zoom?: number | null
+}
+
 interface AnnouncementFormProps {
   categories: Category[]
   organizations: Organization[]
-  initialData?: Partial<AnnouncementFormData & {
-    id?: string
-    poster_crop_x?: number | null
-    poster_crop_y?: number | null
-    poster_zoom?: number | null
-  }>
+  initialData?: AnnouncementFormInitialData
 }
 
 export function AnnouncementForm({
