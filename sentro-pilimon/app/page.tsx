@@ -16,6 +16,14 @@ async function getCategories() {
   return data as EventCategory[] || []
 }
 
+async function getRsvpCounts() {
+  const supabase = await createClient()
+  const { data } = await supabase
+    .from('rsvp_records')
+    .select('announcement_id, rsvp_status')
+  return data || []
+}
+
 async function getAnnouncements() {
   const supabase = await createClient()
   const { data } = await supabase
@@ -33,9 +41,10 @@ async function getAnnouncements() {
 }
 
 export default async function HomePage() {
-  const [categories, announcements] = await Promise.all([
+  const [categories, announcements, rsvpData] = await Promise.all([
     getCategories(),
-    getAnnouncements()
+    getAnnouncements(),
+    getRsvpCounts()
   ])
 
   const announcementCards = announcements.map(a => ({
@@ -51,8 +60,8 @@ export default async function HomePage() {
     posterZoom: a.poster_zoom || 1,
     category: Array.isArray(a.category) ? a.category[0] : a.category,
     organization: a.organization,
-    goingCount: 0,
-    interestedCount: 0,
+    goingCount: rsvpData.filter(r => r.announcement_id === a.id && r.rsvp_status === 'going').length,
+    interestedCount: rsvpData.filter(r => r.announcement_id === a.id && r.rsvp_status === 'interested').length,
   }))
 
   return (
