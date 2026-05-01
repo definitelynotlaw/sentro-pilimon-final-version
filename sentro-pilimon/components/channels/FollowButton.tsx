@@ -6,7 +6,7 @@ import { CheckCircle, PlusCircle } from 'lucide-react'
 
 interface FollowButtonProps {
   channelType: 'org' | 'department' | 'plmun'
-  channelId: string | null
+  channelId: string | null // null for plmun since it has no specific id
   userId: string
   className?: string
 }
@@ -14,34 +14,28 @@ interface FollowButtonProps {
 export function FollowButton({ channelType, channelId, userId, className = '' }: FollowButtonProps) {
   const [isFollowing, setIsFollowing] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-  const [isHydrated, setIsHydrated] = useState(false)
 
   useEffect(() => {
-    setIsHydrated(true)
     if (!userId) return
 
     const supabase = createClient()
 
     const checkFollow = async () => {
+      let query = supabase
+        .from('channel_follows')
+        .select('id')
+        .eq('user_id', userId)
+        .eq('channel_type', channelType)
+        .limit(1)
+
       if (channelId) {
-        const { data } = await supabase
-          .from('channel_follows')
-          .select('id')
-          .eq('user_id', userId)
-          .eq('channel_type', channelType)
-          .eq('channel_id', channelId)
-          .limit(1)
-        setIsFollowing(!!data && data.length > 0)
+        query = query.eq('channel_id', channelId)
       } else {
-        const { data } = await supabase
-          .from('channel_follows')
-          .select('id')
-          .eq('user_id', userId)
-          .eq('channel_type', channelType)
-          .is('channel_id', null)
-          .limit(1)
-        setIsFollowing(!!data && data.length > 0)
+        query = query.is('channel_id', null)
       }
+
+      const { data } = await query
+      setIsFollowing(!!data && data.length > 0)
     }
 
     checkFollow()
@@ -71,27 +65,27 @@ export function FollowButton({ channelType, channelId, userId, className = '' }:
     const supabase = createClient()
 
     if (isFollowing) {
+      // Unfollow
+      let query = supabase
+        .from('channel_follows')
+        .delete()
+        .eq('user_id', userId)
+        .eq('channel_type', channelType)
+
       if (channelId) {
-        await supabase
-          .from('channel_follows')
-          .delete()
-          .eq('user_id', userId)
-          .eq('channel_type', channelType)
-          .eq('channel_id', channelId)
+        query = query.eq('channel_id', channelId)
       } else {
-        await supabase
-          .from('channel_follows')
-          .delete()
-          .eq('user_id', userId)
-          .eq('channel_type', channelType)
-          .is('channel_id', null)
+        query = query.is('channel_id', null)
       }
+
+      await query
       setIsFollowing(false)
     } else {
+      // Follow
       await supabase.from('channel_follows').insert({
         user_id: userId,
         channel_type: channelType,
-        channel_id: channelId ?? null,
+        channel_id: channelId || null,
       })
       setIsFollowing(true)
     }
@@ -99,7 +93,7 @@ export function FollowButton({ channelType, channelId, userId, className = '' }:
     setIsLoading(false)
   }
 
-  if (!isHydrated || !userId) return null
+  if (!userId) return null
 
   return (
     <button

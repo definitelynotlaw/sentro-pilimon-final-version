@@ -2,7 +2,6 @@
 
 import { useState, useEffect, Suspense } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { PLMunLogo } from '@/components/shared/PLMunLogo'
 import { Lock, Loader2, CheckCircle, AlertCircle } from 'lucide-react'
@@ -10,8 +9,6 @@ import { usePasswordStrength } from '@/hooks/usePasswordStrength'
 import { StrengthMeter } from '@/components/ui/StrengthMeter'
 
 function ResetPasswordContent() {
-  const router = useRouter()
-  const searchParams = useSearchParams()
   const supabase = createClient()
 
   const [isLoading, setIsLoading] = useState(true)
@@ -22,26 +19,30 @@ function ResetPasswordContent() {
   const { password: newPassword, setPassword, strength, requirements, isValid } = usePasswordStrength()
 
   useEffect(() => {
-    // Get the token from the URL hash or the query params
-    const hashParams = new URLSearchParams(window.location.hash.slice(1))
-    const queryParams = new URLSearchParams(window.location.search)
-    const accessToken = hashParams.get('access_token') || queryParams.get('access_token')
-    const refreshToken = hashParams.get('refresh_token') || queryParams.get('refresh_token')
+    const initializeSession = async () => {
+      // Get the token from the URL hash (Supabase sends token in hash)
+      const hashParams = new URLSearchParams(window.location.hash.slice(1))
+      const accessToken = hashParams.get('access_token')
+      const refreshToken = hashParams.get('refresh_token')
 
-    if (accessToken) {
-      supabase.auth.setSession({
+      if (!accessToken) {
+        setError('Invalid reset link. Please request a new one.')
+        setIsLoading(false)
+        return
+      }
+
+      const { error } = await supabase.auth.setSession({
         access_token: accessToken,
         refresh_token: refreshToken || '',
-      }).then(({ error }) => {
-        if (error) {
-          setError('This reset link has expired or is invalid. Please request a new one.')
-        }
-        setIsLoading(false)
       })
-    } else {
-      setError('Invalid reset link. Please request a new one.')
+
+      if (error) {
+        setError('This reset link has expired or is invalid. Please request a new one.')
+      }
       setIsLoading(false)
     }
+
+    initializeSession()
   }, [supabase])
 
   const handleSubmit = async (e: React.FormEvent) => {
