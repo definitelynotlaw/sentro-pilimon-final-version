@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { Search } from 'lucide-react'
 import { FilterBar } from './FilterBar'
 import { BulletinGrid } from './BulletinGrid'
@@ -39,6 +39,12 @@ interface BulletinFeedProps {
 
 export function BulletinFeed({ announcements, categories, isLoading }: BulletinFeedProps) {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
+
+  useEffect(() => {
+    const handler = () => setSearchQuery(new URLSearchParams(window.location.search).get('q') || '')
+    window.addEventListener('searchupdate', handler)
+    return () => window.removeEventListener('searchupdate', handler)
+  }, [])
   const [searchQuery, setSearchQuery] = useState(() => typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('q') || '' : '')
 
   const filteredAnnouncements = useMemo(() => {
