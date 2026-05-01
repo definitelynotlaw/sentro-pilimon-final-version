@@ -30,7 +30,7 @@ export default function ManagePostsPage() {
     try {
       const { data, error } = await supabase
         .from('announcements')
-        .select('id, title, status, created_at, organization:organizations(name), category:event_categories(name, color)')
+        .select('id, title, status, created_at')
         .order('created_at', { ascending: false })
         .limit(50)
       if (error) console.error('fetchAnnouncements error:', error)
@@ -38,8 +38,8 @@ export default function ManagePostsPage() {
         setAnnouncements(data.map(d => ({
           ...d,
           publisher: null,
-          organization: d.organization ? (Array.isArray(d.organization) ? d.organization[0] : d.organization) : null,
-          category: d.category ? (Array.isArray(d.category) ? d.category[0] : d.category) : null,
+          organization: null,
+          category: null,
         })))
       }
     } catch (e) {
