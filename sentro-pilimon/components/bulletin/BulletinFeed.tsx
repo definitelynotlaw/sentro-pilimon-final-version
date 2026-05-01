@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import { Search } from 'lucide-react'
 import { FilterBar } from './FilterBar'
 import { BulletinGrid } from './BulletinGrid'
 import { CardSkeleton } from '@/components/shared/LoadingSkeleton'
@@ -38,11 +39,24 @@ interface BulletinFeedProps {
 
 export function BulletinFeed({ announcements, categories, isLoading }: BulletinFeedProps) {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
+  const [searchQuery, setSearchQuery] = useState('')
 
   const filteredAnnouncements = useMemo(() => {
-    if (!selectedCategory) return announcements
-    return announcements.filter(a => a.category?.slug === selectedCategory)
-  }, [announcements, selectedCategory])
+    let result = announcements
+    if (selectedCategory) {
+      result = result.filter(a => a.category?.slug === selectedCategory)
+    }
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase()
+      result = result.filter(a =>
+        a.title.toLowerCase().includes(q) ||
+        a.description?.toLowerCase().includes(q) ||
+        a.venue?.toLowerCase().includes(q) ||
+        a.organization?.name?.toLowerCase().includes(q)
+      )
+    }
+    return result
+  }, [announcements, selectedCategory, searchQuery])
 
   if (isLoading) {
     return (
@@ -58,17 +72,39 @@ export function BulletinFeed({ announcements, categories, isLoading }: BulletinF
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
+      {/* Search bar — mobile only (desktop is in TopNavBar) */}
+      <div className="md:hidden relative">
+        <Search
+          className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4"
+          style={{ color: '#9A9A95' }}
+        />
+        <input
+          type="search"
+          placeholder="Search announcements..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full pl-10 pr-4 py-3 rounded-xl text-sm"
+          style={{
+            backgroundColor: '#F5F5F3',
+            border: '1px solid #EBEBEA',
+            outline: 'none',
+            color: '#1A1A18',
+          }}
+        />
+      </div>
+
       <FilterBar
         categories={categories}
         selectedCategory={selectedCategory}
         onCategoryChange={setSelectedCategory}
       />
+
       {filteredAnnouncements.length === 0 ? (
         <EmptyState
           icon={Megaphone}
-          title={selectedCategory ? `No ${selectedCategory} announcements` : 'No announcements yet'}
-          description={selectedCategory ? `No announcements found in the ${selectedCategory} category.` : 'Check back later for upcoming events and announcements from PLMun.'}
+          title={searchQuery ? `No results for "${searchQuery}"` : selectedCategory ? `No ${selectedCategory} announcements` : 'No announcements yet'}
+          description={searchQuery ? 'Try a different keyword.' : selectedCategory ? `No announcements found in the ${selectedCategory} category.` : 'Check back later for upcoming events and announcements from PLMun.'}
         />
       ) : (
         <BulletinGrid announcements={filteredAnnouncements} />
