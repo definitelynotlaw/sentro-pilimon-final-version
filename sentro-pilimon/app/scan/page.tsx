@@ -123,9 +123,7 @@ export default function ScanPage() {
             </div>
           )}
 
-          {isScanning && (
-            <button
-          )}
+          }
 
           <div
             className="absolute pointer-events-none"
