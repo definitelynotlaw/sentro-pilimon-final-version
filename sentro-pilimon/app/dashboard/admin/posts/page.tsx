@@ -1,5 +1,4 @@
 'use client'
-
 import { useState, useEffect } from 'react'
 import { TopNavBar } from '@/components/navigation/TopNavBar'
 import { BottomTabBar } from '@/components/navigation/BottomTabBar'
@@ -28,20 +27,26 @@ export default function ManagePostsPage() {
   useEffect(() => { fetchAnnouncements() }, [])
 
   const fetchAnnouncements = async () => {
-    const { data } = await supabase
-      .from('announcements')
-      .select('id, title, status, created_at, publisher:users!publisher_user_id(full_name), organization:organizations(name), category:event_categories(name, color)')
-      .order('created_at', { ascending: false })
-      .limit(50)
-    if (data) {
-      setAnnouncements(data.map(d => ({
-        ...d,
-        publisher: Array.isArray(d.publisher) ? d.publisher[0] : d.publisher,
-        organization: d.organization ? (Array.isArray(d.organization) ? d.organization[0] : d.organization) : null,
-        category: d.category ? (Array.isArray(d.category) ? d.category[0] : d.category) : null,
-      })))
+    try {
+      const { data, error } = await supabase
+        .from('announcements')
+        .select('id, title, status, created_at, organization:organizations(name), category:event_categories(name, color)')
+        .order('created_at', { ascending: false })
+        .limit(50)
+      if (error) console.error('fetchAnnouncements error:', error)
+      if (data) {
+        setAnnouncements(data.map(d => ({
+          ...d,
+          publisher: null,
+          organization: d.organization ? (Array.isArray(d.organization) ? d.organization[0] : d.organization) : null,
+          category: d.category ? (Array.isArray(d.category) ? d.category[0] : d.category) : null,
+        })))
+      }
+    } catch (e) {
+      console.error('fetchAnnouncements exception:', e)
+    } finally {
+      setIsLoading(false)
     }
-    setIsLoading(false)
   }
 
   const handleDelete = async (id: string) => {
