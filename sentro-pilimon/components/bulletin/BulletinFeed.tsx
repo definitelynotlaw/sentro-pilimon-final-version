@@ -39,7 +39,7 @@ interface BulletinFeedProps {
 
 export function BulletinFeed({ announcements, categories, isLoading }: BulletinFeedProps) {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
-  const [searchQuery, setSearchQuery] = useState('')
+  const [searchQuery, setSearchQuery] = useState(() => typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('q') || '' : '')
 
   const filteredAnnouncements = useMemo(() => {
     let result = announcements
@@ -83,7 +83,7 @@ export function BulletinFeed({ announcements, categories, isLoading }: BulletinF
           type="search"
           placeholder="Search announcements..."
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          onChange={(e) => { setSearchQuery(e.target.value); const p = new URLSearchParams(window.location.search); e.target.value ? p.set('q', e.target.value) : p.delete('q'); window.history.replaceState(null, '', window.location.pathname + (p.toString() ? '?' + p.toString() : '')); window.dispatchEvent(new Event('searchupdate')); }}
           className="w-full pl-10 pr-4 py-3 rounded-xl text-sm"
           style={{
             backgroundColor: '#F5F5F3',

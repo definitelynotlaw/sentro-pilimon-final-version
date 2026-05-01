@@ -1,6 +1,14 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+const useSearchQuery = () => {
+  if (typeof window === 'undefined') return ''
+  return new URLSearchParams(window.location.search).get('q') || ''
+}
+const useSearchQuery = () => {
+  if (typeof window === 'undefined') return ''
+  return new URLSearchParams(window.location.search).get('q') || ''
+}
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { Search, Menu, X, User, Settings, LogOut, ChevronDown } from 'lucide-react'
@@ -118,6 +126,13 @@ export function TopNavBar() {
             <input
               type="search"
               placeholder="Search announcements..."
+              defaultValue={typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('q') || '' : ''}
+              onChange={(e) => {
+                const params = new URLSearchParams(window.location.search)
+                if (e.target.value) { params.set('q', e.target.value) } else { params.delete('q') }
+                window.history.replaceState(null, '', '?' + params.toString())
+                window.dispatchEvent(new Event('searchupdate'))
+              }}
               className="w-64 pl-10 pr-4 py-2 rounded-lg text-sm"
               style={{
                 backgroundColor: 'rgba(255,255,255,0.1)',
