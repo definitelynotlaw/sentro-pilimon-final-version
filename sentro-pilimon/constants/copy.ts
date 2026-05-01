@@ -166,7 +166,7 @@ export const COPY = {
 
   // Footer
   footer: {
-    copyright: '© 2025 Pamantasan ng Lungsod ng Muntinlupa',
+    copyright: '© 2026 Pamantasan ng Lungsod ng Muntinlupa',
     rightsReserved: 'All rights reserved.',
     privacy: 'Privacy Policy',
     terms: 'Terms of Service',
