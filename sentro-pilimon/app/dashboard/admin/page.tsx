@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { BottomTabBar } from '@/components/navigation/BottomTabBar'
 import { TopNavBar } from '@/components/navigation/TopNavBar'
-import { Users, Grid3X3, FileText, BarChart3, Settings, Shield } from 'lucide-react'
+import { Users, Grid3X3, FileText, BarChart3, Settings, Shield, ImageIcon } from 'lucide-react'
 
 export default async function AdminDashboardPage() {
   const supabase = await createClient()
@@ -130,6 +130,16 @@ export default async function AdminDashboardPage() {
               <BarChart3 className="h-8 w-8 mb-3" style={{ color: '#6B0000' }} />
               <h3 className="font-semibold mb-1" style={{ color: '#1A1A18' }}>Manage Posts</h3>
               <p className="text-sm" style={{ color: '#5A5A56' }}>View and delete any announcement</p>
+            </Link>
+          
+            <Link
+              href="/dashboard/admin/orgs"
+              className="p-6 rounded-xl bg-white hover:shadow-md transition-shadow"
+              style={{ border: '1px solid #EBEBEA' }}
+            >
+              <ImageIcon className="h-8 w-8 mb-3" style={{ color: '#6B0000' }} />
+              <h3 className="font-semibold mb-1" style={{ color: '#1A1A18' }}>Org Logos</h3>
+              <p className="text-sm" style={{ color: '#5A5A56' }}>Upload logos for organizations</p>
             </Link>
           </div>
         </div>
