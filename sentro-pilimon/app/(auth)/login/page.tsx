@@ -121,22 +121,7 @@ export default function LoginPage() {
             </button>
           </form>
 
-          <div className="relative my-6">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full" style={{ borderTop: '1px solid #D4D4CF' }} />
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-4 bg-white" style={{ color: '#9A9A95' }}>or</span>
-            </div>
-          </div>
 
-          <button
-            onClick={handleMagicLink} disabled={isLoading}
-            className="w-full py-3 font-medium rounded-lg transition-colors hover-lift"
-            style={{ border: '2px solid #6B0000', color: '#6B0000', backgroundColor: 'transparent', opacity: isLoading ? 0.5 : 1 }}
-          >
-            Send Magic Link
-          </button>
 
           <div className="mt-4 text-center">
             <Link href="/forgot-password" className="text-sm transition-colors mr-4 hover-lift" style={{ color: '#C9972C' }}>
