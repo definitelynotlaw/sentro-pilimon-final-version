@@ -87,10 +87,9 @@ export function BottomTabBar() {
       </nav>
 
       {/* Mobile user menu modal */}
-      {isHydrated && isAuthenticated && (
+      {isMenuOpen && isAuthenticated && (
         <div
           className="fixed inset-0 z-50 bg-black/50 lg:hidden"
-          style={{ display: isMenuOpen ? 'block' : 'none' }}
           onClick={() => setIsMenuOpen(false)}
         >
           <div
