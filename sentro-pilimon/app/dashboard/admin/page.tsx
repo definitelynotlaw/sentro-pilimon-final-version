@@ -174,7 +174,7 @@ export default async function AdminDashboardPage() {
               className="p-4 rounded-xl text-center font-medium flex items-center justify-center gap-2"
               style={{ backgroundColor: '#F3EEF8', color: '#4A1A7A' }}
             >
-              My Announcements
+              Moderation
             </Link>
           </div>
         </div>
