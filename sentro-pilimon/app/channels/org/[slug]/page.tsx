@@ -7,6 +7,7 @@ import { BulletinGrid } from '@/components/bulletin/BulletinGrid'
 import { AnnouncementCardProps } from '@/components/bulletin/AnnouncementCard'
 import { FollowButton } from '@/components/channels/FollowButton'
 import { getOrgBySlug } from '@/data/organizations'
+import { ChannelQRButton } from '@/components/channels/ChannelQRButton'
 
 interface PageProps {
   params: Promise<{ slug: string }>
@@ -132,7 +133,15 @@ export default async function OrganizationChannelPage({ params }: PageProps) {
       {(org.short_description || user) && (
         <div className="max-w-4xl mx-auto px-4 py-6">
           {org.short_description && <p className="text-center mb-4" style={{ color: '#5A5A56' }}>{org.short_description}</p>}
-          {user && <div className="flex justify-center"><FollowButton channelType="org" channelId={org.id} userId={user.id} /></div>}
+          {user && (
+            <div className="flex justify-center gap-3">
+              <FollowButton channelType="org" channelId={org.id} userId={user.id} />
+              <ChannelQRButton
+                channelUrl={`https://sentro-pilimon-final-version.vercel.app/channels/org/${org.slug}`}
+                channelName={org.name}
+              />
+            </div>
+          )}
         </div>
       )}
 

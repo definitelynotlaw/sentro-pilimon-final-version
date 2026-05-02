@@ -25,3 +25,17 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Failed to generate QR code' }, { status: 500 })
   }
 }
+export async function POST(request: NextRequest) {
+  try {
+    const { url } = await request.json()
+    if (!url) {
+      return NextResponse.json({ error: 'URL required' }, { status: 400 })
+    }
+    const { generateChannelQR } = await import('@/lib/qr')
+    const { qrDataUrl } = await generateChannelQR(url)
+    return NextResponse.json({ qrDataUrl })
+  } catch (error) {
+    console.error('QR generation error:', error)
+    return NextResponse.json({ error: 'Failed to generate QR code' }, { status: 500 })
+  }
+}

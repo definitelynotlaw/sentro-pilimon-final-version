@@ -75,3 +75,17 @@ export function validateCheckinToken(
 export function generateSecureToken(): string {
   return randomBytes(32).toString('hex')
 }
+export async function generateChannelQR(
+  channelUrl: string
+): Promise<{ qrDataUrl: string; targetUrl: string }> {
+  const qrDataUrl = await QRCode.toDataURL(channelUrl, {
+    width: 400,
+    margin: 2,
+    color: {
+      dark: PLMUN_MAROON,
+      light: PLMUN_CREAM,
+    },
+    errorCorrectionLevel: 'H',
+  })
+  return { qrDataUrl, targetUrl: channelUrl }
+}
