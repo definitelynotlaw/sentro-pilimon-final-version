@@ -112,13 +112,7 @@ export default function RegisterPage() {
         <div className="bg-white rounded-2xl p-6 md:p-8" style={{ border: '1px solid #EBEBEA', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }}>
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Name Fields */}
-            <div className="grid grid-cols-3 gap-3">
-              <div>
-                <label htmlFor="surname" className="block text-sm font-medium mb-1" style={{ color: '#5A5A56' }}>Surname</label>
-                <input id="surname" type="text" value={surname} onChange={(e) => setSurname(e.target.value)}
-                  placeholder="Dela Cruz" className="w-full px-3 py-3 rounded-lg text-base"
-                  style={{ border: '1px solid #D4D4CF', outline: 'none' }} required />
-              </div>
+            <div className="space-y-4">
               <div>
                 <label htmlFor="firstName" className="block text-sm font-medium mb-1" style={{ color: '#5A5A56' }}>First Name</label>
                 <input id="firstName" type="text" value={firstName} onChange={(e) => setFirstName(e.target.value)}
@@ -126,10 +120,16 @@ export default function RegisterPage() {
                   style={{ border: '1px solid #D4D4CF', outline: 'none' }} required />
               </div>
               <div>
-                <label htmlFor="middleName" className="block text-sm font-medium mb-1" style={{ color: '#5A5A56' }}>Middle Name</label>
+                <label htmlFor="middleName" className="block text-sm font-medium mb-1" style={{ color: '#5A5A56' }}>Middle Name <span style={{ color: '#9A9A95' }}>(Optional)</span></label>
                 <input id="middleName" type="text" value={middleName} onChange={(e) => setMiddleName(e.target.value)}
-                  placeholder="Optional" className="w-full px-3 py-3 rounded-lg text-base"
+                  placeholder="Santos" className="w-full px-3 py-3 rounded-lg text-base"
                   style={{ border: '1px solid #D4D4CF', outline: 'none' }} />
+              </div>
+              <div>
+                <label htmlFor="surname" className="block text-sm font-medium mb-1" style={{ color: '#5A5A56' }}>Last Name</label>
+                <input id="surname" type="text" value={surname} onChange={(e) => setSurname(e.target.value)}
+                  placeholder="Dela Cruz" className="w-full px-3 py-3 rounded-lg text-base"
+                  style={{ border: '1px solid #D4D4CF', outline: 'none' }} required />
               </div>
             </div>
 

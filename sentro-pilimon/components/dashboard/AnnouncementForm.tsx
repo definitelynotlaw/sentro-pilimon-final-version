@@ -255,7 +255,7 @@ export function AnnouncementForm({
       {/* Poster Upload */}
       <div>
         <label className="block text-sm font-medium mb-1" style={{ color: '#5A5A56' }}>
-          Event Poster
+          Event Poster *
         </label>
         <div
           className="border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-colors"
@@ -298,6 +298,10 @@ export function AnnouncementForm({
                   </p>
                   <p className="text-xs" style={{ color: '#9A9A95' }}>
                     or drag and drop
+                  </p>
+                  <p className="text-xs mt-3 px-2" style={{ color: '#9A9A95', lineHeight: '1.5' }}>
+                    For best results, use a vertical (Portrait) poster.<br />
+                    Recommended: <strong>1080 × 1350 px</strong> (4:5 ratio)
                   </p>
                 </>
               )}
@@ -373,15 +377,23 @@ export function AnnouncementForm({
       {/* Venue */}
       <div>
         <label className="block text-sm font-medium mb-1" style={{ color: '#5A5A56' }}>
-          Venue
+          Venue *
         </label>
         <input
           {...register('venue')}
           type="text"
           placeholder="PLMun Gymnasium"
           className="w-full px-4 py-3 rounded-lg text-base"
-          style={{ border: '1px solid #D4D4CF', outline: 'none' }}
+          style={{
+            border: errors.venue ? '2px solid #9B1C1C' : '1px solid #D4D4CF',
+            outline: 'none',
+          }}
         />
+        {errors.venue && (
+          <p className="text-xs mt-1" style={{ color: '#9B1C1C' }}>
+            {errors.venue.message}
+          </p>
+        )}
       </div>
 
       {/* Submit Buttons */}
