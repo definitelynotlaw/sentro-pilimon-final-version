@@ -93,6 +93,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         } else if (event === 'SIGNED_OUT') {
           setUser(null)
           setProfile(null)
+          router.push('/login')
         } else if (event === 'TOKEN_REFRESHED' && session?.user) {
           setUser(session.user as AuthUser)
         }
