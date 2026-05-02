@@ -1,9 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { Heart, Check, LogIn } from 'lucide-react'
+import { Heart, Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { submitRSVP } from '@/lib/actions/rsvp'
 
@@ -18,6 +18,27 @@ export function RSVPButton({ announcementId, className }: RSVPButtonProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [status, setStatus] = useState<'none' | 'interested' | 'going'>('none')
 
+  useEffect(() => {
+    const fetchCurrentStatus = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      const { data } = await supabase
+        .from('rsvp_records')
+        .select('rsvp_status')
+        .eq('announcement_id', announcementId)
+        .eq('user_id', user.id)
+        .in('rsvp_status', ['going', 'interested'])
+        .single()
+
+      if (data) {
+        setStatus(data.rsvp_status as 'interested' | 'going')
+      }
+    }
+
+    fetchCurrentStatus()
+  }, [announcementId])
+
   const handleRSVP = async (newStatus: 'interested' | 'going') => {
     setIsLoading(true)
 
@@ -27,10 +48,15 @@ export function RSVPButton({ announcementId, className }: RSVPButtonProps) {
       return
     }
 
+    // Optimistically update UI
+    setStatus(newStatus)
+
     const result = await submitRSVP(announcementId, newStatus)
     if (result.success) {
-      setStatus(newStatus)
       router.refresh()
+    } else {
+      // Revert on failure
+      setStatus('none')
     }
 
     setIsLoading(false)
