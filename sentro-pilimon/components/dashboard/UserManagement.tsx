@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Shield, UserX, UserCheck } from 'lucide-react'
+import { Shield, UserX, UserCheck, Trash2 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
 interface User {
@@ -18,6 +18,8 @@ export function UserManagement() {
   const [users, setUsers] = useState<User[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [filter, setFilter] = useState<'all' | 'student' | 'officer' | 'moderator' | 'admin'>('all')
+  const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [confirmId, setConfirmId] = useState<string | null>(null)
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -25,16 +27,11 @@ export function UserManagement() {
         .from('users')
         .select('*')
         .order('created_at', { ascending: false })
-
-      if (filter !== 'all') {
-        query = query.eq('role', filter)
-      }
-
+      if (filter !== 'all') query = query.eq('role', filter)
       const { data } = await query
       if (data) setUsers(data)
       setIsLoading(false)
     }
-
     fetchUsers()
   }, [filter])
 
@@ -49,6 +46,28 @@ export function UserManagement() {
     setUsers(users.map(u => u.id === userId ? { ...u, role: newRole } : u))
   }
 
+  const deleteUser = async (userId: string) => {
+    setDeletingId(userId)
+    try {
+      const res = await fetch('/api/admin/delete-user', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId }),
+      })
+      if (res.ok) {
+        setUsers(users.filter(u => u.id !== userId))
+      } else {
+        const data = await res.json()
+        alert(data.error || 'Failed to delete user')
+      }
+    } catch {
+      alert('An unexpected error occurred')
+    } finally {
+      setDeletingId(null)
+      setConfirmId(null)
+    }
+  }
+
   const roleColors: Record<string, string> = {
     student: '#1E3A5F',
     officer: '#1A6B3C',
@@ -59,6 +78,38 @@ export function UserManagement() {
 
   return (
     <div className="space-y-4">
+      {/* Confirm Delete Modal */}
+      {confirmId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+          <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-xl" style={{ border: '1px solid #EBEBEA' }}>
+            <div className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4" style={{ backgroundColor: '#FEF2F2' }}>
+              <Trash2 className="h-6 w-6" style={{ color: '#9B1C1C' }} />
+            </div>
+            <h2 className="text-lg font-bold text-center mb-2" style={{ color: '#1A1A18' }}>Delete User?</h2>
+            <p className="text-sm text-center mb-6" style={{ color: '#5A5A56' }}>
+              This will permanently delete <strong>{users.find(u => u.id === confirmId)?.full_name}</strong> and all their data. This cannot be undone.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setConfirmId(null)}
+                className="flex-1 py-2.5 rounded-lg font-medium text-sm"
+                style={{ border: '1px solid #D4D4CF', color: '#5A5A56' }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => deleteUser(confirmId)}
+                disabled={deletingId === confirmId}
+                className="flex-1 py-2.5 rounded-lg font-medium text-sm text-white"
+                style={{ backgroundColor: '#9B1C1C', opacity: deletingId === confirmId ? 0.5 : 1 }}
+              >
+                {deletingId === confirmId ? 'Deleting...' : 'Delete'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Filter */}
       <div className="flex gap-2 flex-wrap">
         {(['all', 'student', 'officer', 'moderator', 'admin'] as const).map(f => (
@@ -108,8 +159,7 @@ export function UserManagement() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-3">
-                {/* Role Badge */}
+              <div className="flex items-center gap-2">
                 <select
                   value={user.role}
                   onChange={(e) => updateRole(user.id, e.target.value)}
@@ -127,13 +177,10 @@ export function UserManagement() {
                   <option value="admin">Admin</option>
                 </select>
 
-                {/* Status Toggle */}
                 <button
                   onClick={() => toggleUserStatus(user.id, user.status)}
                   className="p-2 rounded-lg transition-colors"
-                  style={{
-                    backgroundColor: user.status === 'active' ? '#F0FDF4' : '#FEF2F2',
-                  }}
+                  style={{ backgroundColor: user.status === 'active' ? '#F0FDF4' : '#FEF2F2' }}
                   title={user.status === 'active' ? 'Deactivate' : 'Activate'}
                 >
                   {user.status === 'active' ? (
@@ -141,6 +188,15 @@ export function UserManagement() {
                   ) : (
                     <UserX className="h-4 w-4" style={{ color: '#9B1C1C' }} />
                   )}
+                </button>
+
+                <button
+                  onClick={() => setConfirmId(user.id)}
+                  className="p-2 rounded-lg transition-colors"
+                  style={{ backgroundColor: '#FEF2F2' }}
+                  title="Delete user"
+                >
+                  <Trash2 className="h-4 w-4" style={{ color: '#9B1C1C' }} />
                 </button>
               </div>
             </div>

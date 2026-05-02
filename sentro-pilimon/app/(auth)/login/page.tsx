@@ -49,23 +49,6 @@ export default function LoginPage() {
     }
   }
 
-  const handleMagicLink = async () => {
-    if (!email) { setError('Please enter your email address'); return }
-    setIsLoading(true)
-    setError('')
-    try {
-      const { error } = await supabase.auth.signInWithOtp({
-        email,
-        options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
-      })
-      if (error) { setError(error.message) } else { setError('Check your email for the magic link!') }
-    } catch {
-      setError('An unexpected error occurred')
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
   return (
     <main className="min-h-screen flex flex-col items-center justify-center p-4" style={{ backgroundColor: '#FAFAF7' }}>
       <div className="w-full max-w-md">
