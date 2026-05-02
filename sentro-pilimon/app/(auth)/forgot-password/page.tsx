@@ -25,7 +25,7 @@ export default function ForgotPasswordPage() {
             Password resets are handled by your system administrator. Please reach out to your department office or IT support for assistance.
           </p>
           <div className="p-3 rounded-lg text-sm mb-6" style={{ backgroundColor: '#F5F5F3', color: '#5A5A56' }}>
-            📧 info@plmun.edu.ph
+            📧 alawrencesalamat@gmail.com
           </div>
           <Link
             href="/login"
