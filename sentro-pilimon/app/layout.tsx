@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Toaster } from 'sonner'
 import { Playfair_Display, Plus_Jakarta_Sans, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
@@ -53,6 +54,7 @@ export default function RootLayout({
         </a>
         <Providers>
           {children}
+          <Toaster position="bottom-center" richColors />
         </Providers>
       </body>
     </html>
