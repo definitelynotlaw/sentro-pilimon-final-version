@@ -300,8 +300,7 @@ export function AnnouncementForm({
                     or drag and drop
                   </p>
                   <p className="text-xs mt-3 px-2" style={{ color: '#9A9A95', lineHeight: '1.5' }}>
-                    For best results, use a vertical (Portrait) poster.<br />
-                    Recommended: <strong>1080 × 1350 px</strong> (4:5 ratio)
+                    Recommended: 1080 × 1080 px (1:1 square — best for mobile)
                   </p>
                 </>
               )}
