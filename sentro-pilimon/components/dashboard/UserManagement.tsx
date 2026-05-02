@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Shield, UserX, UserCheck, Trash2 } from 'lucide-react'
+import { Shield, UserX, UserCheck, Trash2, KeyRound } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
 interface User {
@@ -20,6 +20,8 @@ export function UserManagement() {
   const [filter, setFilter] = useState<'all' | 'student' | 'officer' | 'moderator' | 'admin'>('all')
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [confirmId, setConfirmId] = useState<string | null>(null)
+  const [resettingId, setResettingId] = useState<string | null>(null)
+  const [resetConfirmId, setResetConfirmId] = useState<string | null>(null)
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -68,6 +70,28 @@ export function UserManagement() {
     }
   }
 
+  const resetPassword = async (userId: string) => {
+    setResettingId(userId)
+    try {
+      const res = await fetch('/api/admin/reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId }),
+      })
+      if (res.ok) {
+        alert('Password reset to SentroPilimon2026! successfully.')
+      } else {
+        const data = await res.json()
+        alert(data.error || 'Failed to reset password')
+      }
+    } catch {
+      alert('An unexpected error occurred')
+    } finally {
+      setResettingId(null)
+      setResetConfirmId(null)
+    }
+  }
+
   const roleColors: Record<string, string> = {
     student: '#1E3A5F',
     officer: '#1A6B3C',
@@ -104,6 +128,41 @@ export function UserManagement() {
                 style={{ backgroundColor: '#9B1C1C', opacity: deletingId === confirmId ? 0.5 : 1 }}
               >
                 {deletingId === confirmId ? 'Deleting...' : 'Delete'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Reset Password Confirm Modal */}
+      {resetConfirmId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+          <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-xl" style={{ border: '1px solid #EBEBEA' }}>
+            <div className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4" style={{ backgroundColor: '#FFF8EC' }}>
+              <KeyRound className="h-6 w-6" style={{ color: '#C9972C' }} />
+            </div>
+            <h2 className="text-lg font-bold text-center mb-2" style={{ color: '#1A1A18' }}>Reset Password?</h2>
+            <p className="text-sm text-center mb-2" style={{ color: '#5A5A56' }}>
+              This will reset <strong>{users.find(u => u.id === resetConfirmId)?.full_name}</strong>'s password to:
+            </p>
+            <p className="text-center font-mono font-bold mb-6 p-2 rounded-lg" style={{ backgroundColor: '#F5F5F3', color: '#1A1A18' }}>
+              SentroPilimon2026!
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setResetConfirmId(null)}
+                className="flex-1 py-2.5 rounded-lg font-medium text-sm"
+                style={{ border: '1px solid #D4D4CF', color: '#5A5A56' }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => resetPassword(resetConfirmId)}
+                disabled={resettingId === resetConfirmId}
+                className="flex-1 py-2.5 rounded-lg font-medium text-sm text-white"
+                style={{ backgroundColor: '#C9972C', opacity: resettingId === resetConfirmId ? 0.5 : 1 }}
+              >
+                {resettingId === resetConfirmId ? 'Resetting...' : 'Reset'}
               </button>
             </div>
           </div>
@@ -188,6 +247,15 @@ export function UserManagement() {
                   ) : (
                     <UserX className="h-4 w-4" style={{ color: '#9B1C1C' }} />
                   )}
+                </button>
+
+                <button
+                  onClick={() => setResetConfirmId(user.id)}
+                  className="p-2 rounded-lg transition-colors"
+                  style={{ backgroundColor: '#FFF8EC' }}
+                  title="Reset password"
+                >
+                  <KeyRound className="h-4 w-4" style={{ color: '#C9972C' }} />
                 </button>
 
                 <button
