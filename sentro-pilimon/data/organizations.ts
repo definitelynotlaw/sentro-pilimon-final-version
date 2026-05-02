@@ -72,6 +72,7 @@ export const universityOrganizations: Organization[] = [
   { id: 'euphoria', name: 'Euphoria', slug: 'euphoria', accent_color: '#4A1A7A', logo_url: null, short_description: 'Dance production group', type: 'university_org' },
   { id: 'nsrc', name: 'NSRC', slug: 'nsrc', accent_color: '#1A6B3C', logo_url: null, short_description: 'National Service Reserved Corps', type: 'university_org' },
   { id: 'warden', name: 'The Warden', slug: 'the-warden', accent_color: '#1A1A18', logo_url: null, short_description: 'Student publication', type: 'university_org' },
+  { id: 'celestial-esports', name: 'PLMun Celestial Esports', slug: 'plmun-celestial-esports', accent_color: '#1A6B3C', logo_url: null, short_description: 'Official esports organization', type: 'university_org' },
 ]
 
 // Service Offices
