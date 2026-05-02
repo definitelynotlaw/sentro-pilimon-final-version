@@ -56,6 +56,8 @@ function SectionHeader({ title, badge }: { title: string; badge?: string }) {
   )
 }
 
+export const dynamic = "force-dynamic"
+
 export default async function ChannelsPage() {
   const supabase = await createClient()
   const { data: dbOrgs } = await supabase
