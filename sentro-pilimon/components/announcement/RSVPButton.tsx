@@ -52,7 +52,6 @@ export function RSVPButton({ announcementId, className }: RSVPButtonProps) {
     setStatus(newStatus)
 
     const result = await submitRSVP(announcementId, newStatus)
-    console.log('RSVP result:', result)
     if (result.success) {
       router.refresh()
     } else {
