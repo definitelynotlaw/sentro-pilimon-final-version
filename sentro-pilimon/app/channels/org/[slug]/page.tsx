@@ -105,7 +105,7 @@ export default async function OrganizationChannelPage({ params }: PageProps) {
       >
         <div
           className="w-16 h-16 rounded-full flex-shrink-0 flex items-center justify-center text-white text-xl font-bold overflow-hidden"
-          style={{ backgroundColor: org.accent_color || '#6B0000' }}
+          style={{ backgroundColor: '#EBEBEA', color: '#5A5A56' }}
         >
           {org.logo_url ? (
             <img src={org.logo_url} alt={org.name} className="w-full h-full object-cover" />
