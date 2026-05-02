@@ -26,6 +26,7 @@ export async function DELETE(request: Request) {
   const { id } = await request.json()
   if (!id) return NextResponse.json({ error: 'Missing id' }, { status: 400 })
   await supabase.from('audit_logs').delete().eq('announcement_id', id)
+  await supabase.from('audit_logs').delete().eq('announcement_id', id)
   const { error } = await supabase.from('announcements').delete().eq('id', id)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   revalidatePath('/')
