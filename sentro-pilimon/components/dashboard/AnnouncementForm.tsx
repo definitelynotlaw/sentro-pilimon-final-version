@@ -271,7 +271,7 @@ export function AnnouncementForm({
                 type="button"
                 onClick={() => {
                   setPosterPreview(null)
-                  setValue('poster_url', undefined)
+                  setValue('poster_url', '')
                 }}
                 className="px-4 py-2 rounded-lg flex items-center gap-2 mx-auto"
                 style={{ backgroundColor: '#9B1C1C', color: 'white' }}
