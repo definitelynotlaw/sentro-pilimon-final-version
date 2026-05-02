@@ -1,9 +1,12 @@
+import { TopNavBar } from '@/components/navigation/TopNavBar'
 import Link from 'next/link'
 import { PLMunLogo } from '@/components/shared/PLMunLogo'
 import { COPY } from '@/constants/copy'
 
 export default function AboutPage() {
   return (
+    <>
+    <TopNavBar />
     <main className="min-h-screen pb-20 md:pb-0">
       {/* Header */}
       <div className="py-6 px-4">
