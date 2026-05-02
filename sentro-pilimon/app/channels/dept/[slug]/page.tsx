@@ -8,6 +8,7 @@ import { BulletinGrid } from '@/components/bulletin/BulletinGrid'
 import { AnnouncementCardProps } from '@/components/bulletin/AnnouncementCard'
 import { FollowButton } from '@/components/channels/FollowButton'
 import { departments } from '@/data/organizations'
+import { ChannelQRButton } from '@/components/channels/ChannelQRButton'
 
 interface PageProps {
   params: Promise<{ slug: string }>
@@ -121,7 +122,15 @@ export default async function DepartmentChannelPage({ params }: PageProps) {
       {(dept.short_description || user) && (
         <div className="max-w-4xl mx-auto px-4 py-6">
           {dept.short_description && dept.short_description !== dept.college && <p className="text-center mb-4" style={{ color: '#5A5A56' }}>{dept.short_description}</p>}
-          {user && <div className="flex justify-center"><FollowButton channelType="department" channelId={dept.id} userId={user.id} /></div>}
+          {user && (
+            <div className="flex justify-center gap-3">
+              <FollowButton channelType="department" channelId={dept.id} userId={user.id} />
+              <ChannelQRButton
+                channelUrl={`https://sentro-pilimon-final-version.vercel.app/channels/dept/${dept.slug}`}
+                channelName={dept.name}
+              />
+            </div>
+          )}
         </div>
       )}
 
