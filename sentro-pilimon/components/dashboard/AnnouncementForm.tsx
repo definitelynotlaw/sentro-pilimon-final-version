@@ -7,6 +7,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Upload, X, Loader2, CheckCircle, ArrowLeft } from 'lucide-react'
+import { toast } from 'sonner'
 import { announcementFormSchema, type AnnouncementFormData } from '@/lib/validations/announcement.schema'
 import { PosterCropper } from './PosterCropper'
 
@@ -138,7 +139,7 @@ export function AnnouncementForm({
       const result = await response.json()
 
       if (result.success) {
-        setSuccessMessage(isEditing ? 'Announcement updated successfully!' : 'Announcement created successfully! Redirecting...')
+        toast.success(isEditing ? 'Announcement updated!' : 'Announcement created! Redirecting...')
         if (!isEditing) {
           setTimeout(() => {
             router.push('/dashboard/officer')
