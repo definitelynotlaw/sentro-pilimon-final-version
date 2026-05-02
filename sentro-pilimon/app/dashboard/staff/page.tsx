@@ -114,6 +114,24 @@ export default async function StaffDashboardPage() {
               <CheckCircle className="h-5 w-5" />
               Review Pending ({pendingCount || 0})
             </Link>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+              <Link
+                href="/dashboard/officer/create"
+                className="p-4 rounded-xl text-white text-center font-medium flex items-center justify-center gap-2"
+                style={{ backgroundColor: '#6B0000' }}
+              >
+                <Plus className="h-5 w-5" />
+                Create New
+              </Link>
+              <Link
+                href="/dashboard/officer"
+                className="p-4 rounded-xl text-center font-medium flex items-center justify-center gap-2"
+                style={{ backgroundColor: '#F5ECEC', color: '#6B0000' }}
+              >
+                <FileText className="h-5 w-5" />
+                My Announcements
+              </Link>
+            </div>
           </div>
         )}
 
