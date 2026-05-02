@@ -42,6 +42,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${playfair.variable} ${jakartaSans.variable} ${jetbrainsMono.variable}`}>
       <head>
+        <link rel="icon" href="/icon.svg" type="image/svg+xml" />
         <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <meta name="theme-color" content="#6B0000" />
