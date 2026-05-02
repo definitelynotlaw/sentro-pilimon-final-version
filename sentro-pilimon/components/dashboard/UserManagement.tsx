@@ -202,27 +202,29 @@ export function UserManagement() {
           {users.map(user => (
             <div
               key={user.id}
-              className="flex items-center justify-between p-4 rounded-xl bg-white"
+              className="p-4 rounded-xl bg-white"
               style={{ border: '1px solid #EBEBEA' }}
             >
-              <div className="flex items-center gap-3">
+              {/* Top row: avatar + name/email */}
+              <div className="flex items-center gap-3 mb-3">
                 <div
-                  className="w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold"
+                  className="w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center text-white font-semibold"
                   style={{ backgroundColor: roleColors[user.role] || '#9A9A95' }}
                 >
                   {user.full_name?.charAt(0).toUpperCase() || '?'}
                 </div>
-                <div>
-                  <p className="font-medium" style={{ color: '#1A1A18' }}>{user.full_name}</p>
-                  <p className="text-xs" style={{ color: '#9A9A95' }}>{user.email}</p>
+                <div className="min-w-0 flex-1">
+                  <p className="font-medium truncate" style={{ color: '#1A1A18' }}>{user.full_name}</p>
+                  <p className="text-xs truncate" style={{ color: '#9A9A95' }}>{user.email}</p>
                 </div>
               </div>
 
+              {/* Bottom row: controls */}
               <div className="flex items-center gap-2">
                 <select
                   value={user.role}
                   onChange={(e) => updateRole(user.id, e.target.value)}
-                  className="px-2 py-1 text-xs font-medium rounded-lg"
+                  className="flex-1 min-w-0 px-2 py-1.5 text-xs font-medium rounded-lg"
                   style={{
                     backgroundColor: `${roleColors[user.role]}20`,
                     color: roleColors[user.role],
@@ -238,7 +240,7 @@ export function UserManagement() {
 
                 <button
                   onClick={() => toggleUserStatus(user.id, user.status)}
-                  className="p-2 rounded-lg transition-colors"
+                  className="p-2 rounded-lg flex-shrink-0 transition-colors"
                   style={{ backgroundColor: user.status === 'active' ? '#F0FDF4' : '#FEF2F2' }}
                   title={user.status === 'active' ? 'Deactivate' : 'Activate'}
                 >
@@ -251,7 +253,7 @@ export function UserManagement() {
 
                 <button
                   onClick={() => setResetConfirmId(user.id)}
-                  className="p-2 rounded-lg transition-colors"
+                  className="p-2 rounded-lg flex-shrink-0 transition-colors"
                   style={{ backgroundColor: '#FFF8EC' }}
                   title="Reset password"
                 >
@@ -260,7 +262,7 @@ export function UserManagement() {
 
                 <button
                   onClick={() => setConfirmId(user.id)}
-                  className="p-2 rounded-lg transition-colors"
+                  className="p-2 rounded-lg flex-shrink-0 transition-colors"
                   style={{ backgroundColor: '#FEF2F2' }}
                   title="Delete user"
                 >
