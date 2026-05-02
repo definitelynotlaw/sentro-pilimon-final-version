@@ -2,14 +2,16 @@ import Link from 'next/link'
 import { BottomTabBar } from '@/components/navigation/BottomTabBar'
 import { TopNavBar } from '@/components/navigation/TopNavBar'
 import { PLMunLogo } from '@/components/shared/PLMunLogo'
-import { Organization, departments, studentCouncils, departmentOrganizations, universityOrganizations, serviceOffices } from '@/data/organizations'
+import { departments, studentCouncils, departmentOrganizations, universityOrganizations, serviceOffices } from '@/data/organizations'
+import { createClient } from '@/lib/supabase/server'
 
-function HorizontalCard({ href, accent, initials, name, sub }: {
+function HorizontalCard({ href, accent, initials, name, sub, logoUrl }: {
   href: string
   accent: string
   initials: string
   name: string
   sub?: string
+  logoUrl?: string | null
 }) {
   return (
     <Link
@@ -18,10 +20,14 @@ function HorizontalCard({ href, accent, initials, name, sub }: {
       style={{ border: '1px solid #EBEBEA' }}
     >
       <div
-        className="w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center text-white font-bold text-sm"
+        className="w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center text-white font-bold text-sm overflow-hidden"
         style={{ backgroundColor: accent }}
       >
-        {initials}
+        {logoUrl ? (
+          <img src={logoUrl} alt={name} className="w-full h-full object-cover" />
+        ) : (
+          initials
+        )}
       </div>
       <div className="min-w-0">
         <p className="font-semibold text-sm leading-tight truncate" style={{ color: '#1A1A18', fontFamily: "'Playfair Display', Georgia, serif" }}>
@@ -50,7 +56,19 @@ function SectionHeader({ title, badge }: { title: string; badge?: string }) {
   )
 }
 
-export default function ChannelsPage() {
+export default async function ChannelsPage() {
+  const supabase = await createClient()
+  const { data: dbOrgs } = await supabase
+    .from('organizations')
+    .select('slug, logo_url')
+
+  const logoMap: Record<string, string | null> = {}
+  if (dbOrgs) {
+    for (const o of dbOrgs) {
+      logoMap[o.slug] = o.logo_url
+    }
+  }
+
   return (
     <main className="min-h-screen pb-20 md:pb-0">
       <TopNavBar />
@@ -60,7 +78,6 @@ export default function ChannelsPage() {
           Channels
         </h1>
 
-        {/* Pilimon Bulletin */}
         <Link
           href="/"
           className="block mb-8 p-6 rounded-xl text-white transition-transform hover:scale-[1.01]"
@@ -82,7 +99,6 @@ export default function ChannelsPage() {
           </div>
         </Link>
 
-        {/* Departments */}
         <section className="mb-8">
           <SectionHeader title="Departments" badge={`${departments.length} colleges`} />
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
@@ -94,12 +110,12 @@ export default function ChannelsPage() {
                 initials={dept.name.slice(0, 2)}
                 name={dept.name}
                 sub={dept.college}
+                logoUrl={logoMap[dept.slug]}
               />
             ))}
           </div>
         </section>
 
-        {/* Student Councils */}
         <section className="mb-8">
           <SectionHeader title="Student Councils" badge={`${studentCouncils.length} councils`} />
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
@@ -111,12 +127,12 @@ export default function ChannelsPage() {
                 initials={council.name.split(' ').map((w: string) => w[0]).slice(0, 2).join('')}
                 name={council.name}
                 sub={council.short_description}
+                logoUrl={logoMap[council.slug]}
               />
             ))}
           </div>
         </section>
 
-        {/* Department Organizations */}
         <section className="mb-8">
           <SectionHeader title="Department Organizations" />
           {Object.entries(departmentOrganizations).map(([college, orgs]) => (
@@ -131,6 +147,7 @@ export default function ChannelsPage() {
                     initials={org.name.slice(0, 2)}
                     name={org.name}
                     sub={org.short_description}
+                    logoUrl={logoMap[org.slug]}
                   />
                 ))}
               </div>
@@ -138,7 +155,6 @@ export default function ChannelsPage() {
           ))}
         </section>
 
-        {/* University Organizations */}
         <section className="mb-8">
           <SectionHeader title="University Organizations" badge={`${universityOrganizations.length} orgs`} />
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
@@ -150,12 +166,12 @@ export default function ChannelsPage() {
                 initials={org.name.slice(0, 2)}
                 name={org.name}
                 sub={org.short_description}
+                logoUrl={logoMap[org.slug]}
               />
             ))}
           </div>
         </section>
 
-        {/* Services */}
         <section className="mb-8">
           <SectionHeader title="Services" badge={`${serviceOffices.length} offices`} />
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
@@ -167,6 +183,7 @@ export default function ChannelsPage() {
                 initials={service.name.slice(0, 2)}
                 name={service.name}
                 sub={service.short_description}
+                logoUrl={logoMap[service.slug]}
               />
             ))}
           </div>
