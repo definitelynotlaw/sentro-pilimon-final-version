@@ -99,49 +99,39 @@ export default async function OrganizationChannelPage({ params }: PageProps) {
     <main className="min-h-screen pb-20 md:pb-0">
       <TopNavBar />
 
-      {/* Banner */}
+      {/* Header */}
       <div
-        className="h-32 md:h-48 relative flex items-center justify-center"
-        style={{ backgroundColor: org.accent_color || '#6B0000' }}
+        className="flex items-center gap-4 max-w-4xl mx-auto px-4 py-6"
       >
-        {org.banner_url && (
-          <img
-            src={org.banner_url}
-            alt=""
-            className="absolute inset-0 w-full h-full object-cover opacity-20"
-          />
-        )}
-        <div className="text-center text-white relative z-10">
-          <div
-            className="w-16 h-16 rounded-full mx-auto mb-3 flex items-center justify-center text-xl font-bold overflow-hidden"
-            style={{ backgroundColor: 'rgba(255,255,255,0.2)' }}
-          >
-            {org.logo_url ? (
-              <img src={org.logo_url} alt={org.name} className="w-full h-full object-cover" />
-            ) : (
-              org.name.slice(0, 2)
-            )}
-          </div>
-          <h1 className="text-2xl font-bold">{org.name}</h1>
+        <div
+          className="w-16 h-16 rounded-full flex-shrink-0 flex items-center justify-center text-white text-xl font-bold overflow-hidden"
+          style={{ backgroundColor: org.accent_color || '#6B0000' }}
+        >
+          {org.logo_url ? (
+            <img src={org.logo_url} alt={org.name} className="w-full h-full object-cover" />
+          ) : (
+            org.name.slice(0, 2)
+          )}
+        </div>
+        <div>
+          <h1 className="text-2xl font-bold" style={{ color: '#1A1A18', fontFamily: "'Playfair Display', Georgia, serif" }}>{org.name}</h1>
+          {org.short_description && (
+            <p className="text-sm mt-0.5" style={{ color: '#5A5A56' }}>{org.short_description}</p>
+          )}
           {org.member_count && org.member_count > 0 && (
-            <p className="text-sm opacity-80">{org.member_count} members</p>
+            <p className="text-xs mt-0.5" style={{ color: '#9A9A95' }}>{org.member_count} members</p>
           )}
         </div>
       </div>
 
-      {/* Description + Follow */}
-      {(org.short_description || user) && (
-        <div className="max-w-4xl mx-auto px-4 py-6">
-          {org.short_description && <p className="text-center mb-4" style={{ color: '#5A5A56' }}>{org.short_description}</p>}
-          {user && (
-            <div className="flex justify-center gap-3">
-              <FollowButton channelType="org" channelId={org.id} userId={user.id} />
-              <ChannelQRButton
-                channelUrl={`https://sentro-pilimon-final-version.vercel.app/channels/org/${org.slug}`}
-                channelName={org.name}
-              />
-            </div>
-          )}
+      {/* Follow + QR */}
+      {user && (
+        <div className="max-w-4xl mx-auto px-4 pb-4 flex gap-3">
+          <FollowButton channelType="org" channelId={org.id} userId={user.id} />
+          <ChannelQRButton
+            channelUrl={`https://sentro-pilimon-final-version.vercel.app/channels/org/${org.slug}`}
+            channelName={org.name}
+          />
         </div>
       )}
 
