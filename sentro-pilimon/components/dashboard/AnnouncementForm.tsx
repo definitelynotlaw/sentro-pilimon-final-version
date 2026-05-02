@@ -233,24 +233,27 @@ export function AnnouncementForm({
       {/* Organization (optional) */}
       <div>
         <label className="block text-sm font-medium mb-1" style={{ color: '#5A5A56' }}>
-          Organization / Office
+          Organization / Office *
         </label>
         <select
           {...register('org_id')}
           className="w-full px-4 py-3 rounded-lg text-base"
           style={{
-            border: '1px solid #D4D4CF',
+            border: errors.org_id ? '2px solid #9B1C1C' : '1px solid #D4D4CF',
             outline: 'none',
             backgroundColor: 'white',
           }}
         >
-          <option value="">None</option>
+          <option value="">Select an organization</option>
           {organizations.map((org) => (
             <option key={org.id} value={org.id}>
               {org.name}
             </option>
           ))}
         </select>
+        {errors.org_id && (
+          <p className="text-xs mt-1" style={{ color: "#9B1C1C" }}>{errors.org_id.message}</p>
+        )}
       </div>
 
       {/* Poster Upload */}
@@ -308,6 +311,9 @@ export function AnnouncementForm({
             </label>
           )}
         </div>
+      {errors.poster_url && (
+        <p className="text-xs mt-1" style={{ color: "#9B1C1C" }}>Event poster is required</p>
+      )}
       </div>
 
       {/* Description */}

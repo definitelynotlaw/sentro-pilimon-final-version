@@ -24,7 +24,7 @@ export const announcementFormSchema = z.object({
   poster_crop_y: z.number().optional().nullable(),
   poster_zoom: z.number().optional().nullable(),
   tags: z.array(z.string()).max(10, 'Maximum 10 tags').optional(),
-  org_id: z.string().optional().nullable(),
+  org_id: z.string().min(1, 'Organization is required'),
   office_id: z.string().optional().nullable(),
 }).refine(
   (data) => new Date(data.end_datetime) > new Date(data.start_datetime),
