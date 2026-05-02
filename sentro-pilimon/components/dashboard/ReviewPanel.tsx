@@ -36,7 +36,7 @@ export function ReviewPanel({ announcement }: ReviewPanelProps) {
 
     // For demo: approved immediately publishes
     // In production, this could be a two-step (approved → published)
-    const finalStatus = actionType === 'approved' ? 'published' : actionType
+    const finalStatus = actionType === 'approved' ? 'published' : actionType === 'rejected' ? 'archived' : 'draft'
 
     const { error } = await supabase
       .from('announcements')
