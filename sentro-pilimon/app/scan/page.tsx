@@ -43,13 +43,23 @@ export default function ScanPage() {
       scannerRef.current = scanner
       await scanner.start(
         { facingMode: 'environment' },
-        { fps: 10, qrbox: { width: 200, height: 200 } },
+        { fps: 10, qrbox: { width: 280, height: 280 } },
         (decodedText) => {
-          const match = decodedText.match(/announcement\/([a-f0-9-]+)/i)
-          if (match) {
-            scanner.stop().then(() => { router.push(`/announcement/${match[1]}`) })
-          } else if (decodedText.startsWith('/announcement/')) {
+          setError('')
+          const DOMAIN = 'sentro-pilimon-final-version.vercel.app'
+          const announcementMatch = decodedText.match(/announcement\/([a-f0-9-]+)/i)
+          const orgMatch = decodedText.match(/\/channels\/org\/([^/?]+)/)
+          const deptMatch = decodedText.match(/\/channels\/dept\/([^/?]+)/)
+          if (announcementMatch) {
+            scanner.stop().then(() => { router.push(`/announcement/${announcementMatch[1]}`) })
+          } else if (orgMatch) {
+            scanner.stop().then(() => { router.push(`/channels/org/${orgMatch[1]}`) })
+          } else if (deptMatch) {
+            scanner.stop().then(() => { router.push(`/channels/dept/${deptMatch[1]}`) })
+          } else if (decodedText.startsWith('/channels/')) {
             scanner.stop().then(() => { router.push(decodedText) })
+          } else if (decodedText.includes(DOMAIN)) {
+            try { const u = new URL(decodedText); scanner.stop().then(() => { router.push(u.pathname) }) } catch {}
           } else {
             setError('Invalid QR code. This is not a Sentro Pilimon QR code.')
           }
@@ -81,11 +91,22 @@ export default function ScanPage() {
     e.preventDefault()
     setError('')
     const url = manualUrl.trim()
-    const match = url.match(/announcement\/([a-f0-9-]+)/i)
-    if (match) {
-      router.push(`/announcement/${match[1]}`)
+    const DOMAIN = 'sentro-pilimon-final-version.vercel.app'
+    const announcementMatch = url.match(/announcement\/([a-f0-9-]+)/i)
+    const orgMatch = url.match(/\/channels\/org\/([^/?]+)/)
+    const deptMatch = url.match(/\/channels\/dept\/([^/?]+)/)
+    if (announcementMatch) {
+      router.push(`/announcement/${announcementMatch[1]}`)
+    } else if (orgMatch) {
+      router.push(`/channels/org/${orgMatch[1]}`)
+    } else if (deptMatch) {
+      router.push(`/channels/dept/${deptMatch[1]}`)
+    } else if (url.startsWith('/channels/')) {
+      router.push(url)
+    } else if (url.includes(DOMAIN)) {
+      try { const parsed = new URL(url); router.push(parsed.pathname) } catch { setError('Invalid URL') }
     } else {
-      setError('Invalid announcement URL')
+      setError('Invalid URL. Only Sentro Pilimon links are supported.')
     }
   }
 
@@ -126,12 +147,12 @@ export default function ScanPage() {
 
           <div
             className="absolute pointer-events-none"
-            style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: '200px', height: '200px' }}
+            style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: '280px', height: '280px' }}
           >
-            <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 rounded-tl-xl" style={{ borderColor: '#C9972C' }} />
-            <div className="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 rounded-tr-xl" style={{ borderColor: '#C9972C' }} />
-            <div className="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 rounded-bl-xl" style={{ borderColor: '#C9972C' }} />
-            <div className="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 rounded-br-xl" style={{ borderColor: '#C9972C' }} />
+            <div className="absolute top-0 left-0 w-10 h-10 border-t-4 border-l-4 rounded-tl-xl" style={{ borderColor: '#C9972C' }} />
+            <div className="absolute top-0 right-0 w-10 h-10 border-t-4 border-r-4 rounded-tr-xl" style={{ borderColor: '#C9972C' }} />
+            <div className="absolute bottom-0 left-0 w-10 h-10 border-b-4 border-l-4 rounded-bl-xl" style={{ borderColor: '#C9972C' }} />
+            <div className="absolute bottom-0 right-0 w-10 h-10 border-b-4 border-r-4 rounded-br-xl" style={{ borderColor: '#C9972C' }} />
           </div>
         </div>
 
