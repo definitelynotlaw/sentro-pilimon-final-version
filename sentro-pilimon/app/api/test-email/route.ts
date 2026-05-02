@@ -29,7 +29,7 @@ export async function GET() {
 
     const { data, error } = await resend.emails.send({
       from: getFromEmail(),
-      to: 'alibangbanglawrencejohn_bscs@plmun.edu.ph',
+      to: 'faaarbeyond@gmail.com',
       subject: 'Sentro Pilimon - Test Email',
       html: `
         <h1>Test Email from Sentro Pilimon</h1>
