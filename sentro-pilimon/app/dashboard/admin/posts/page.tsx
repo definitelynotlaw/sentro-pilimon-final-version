@@ -2,7 +2,6 @@
 import { useState, useEffect } from 'react'
 import { TopNavBar } from '@/components/navigation/TopNavBar'
 import { BottomTabBar } from '@/components/navigation/BottomTabBar'
-import { createClient } from '@/lib/supabase/client'
 import { Trash2, ArrowLeft, Loader2 } from 'lucide-react'
 import { format } from 'date-fns'
 import Link from 'next/link'
@@ -15,7 +14,6 @@ interface Announcement {
 }
 
 export default function ManagePostsPage() {
-  const supabase = createClient()
   const [announcements, setAnnouncements] = useState<Announcement[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [deletingId, setDeletingId] = useState<string | null>(null)
@@ -26,15 +24,15 @@ export default function ManagePostsPage() {
 
   const fetchAnnouncements = async () => {
     try {
-      const { data, error } = await supabase
-        .from('announcements')
-        .select('id, title, status, created_at')
-        .order('created_at', { ascending: false })
-        .limit(50)
-      if (error) { console.error('fetch error:', error); setError(error.message) }
-      if (data) setAnnouncements(data)
+      const res = await fetch('/api/admin/announcements')
+      const json = await res.json()
+      if (res.ok && json.data) {
+        setAnnouncements(json.data)
+      } else {
+        setError(json.error || 'Failed to load posts')
+      }
     } catch (e) {
-      console.error('fetch exception:', e)
+      setError('Failed to load posts')
     } finally {
       setIsLoading(false)
     }
@@ -102,7 +100,7 @@ export default function ManagePostsPage() {
               <div key={ann.id} className="p-4 rounded-xl bg-white" style={{ border: '1px solid #EBEBEA' }}>
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1 flex-wrap">
+                    <div className="flex items-center gap-2 mb-1">
                       <span className="px-2 py-0.5 text-xs font-semibold rounded-full capitalize" style={{ backgroundColor: (statusColor[ann.status] || '#5A5A56') + '20', color: statusColor[ann.status] || '#5A5A56' }}>
                         {ann.status}
                       </span>

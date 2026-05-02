@@ -1,3 +1,5 @@
+export const revalidate = 0
+
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { PLMunLogo } from '@/components/shared/PLMunLogo'
