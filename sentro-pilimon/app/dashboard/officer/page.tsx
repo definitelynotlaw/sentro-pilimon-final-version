@@ -19,7 +19,7 @@ export default async function OfficerDashboardPage() {
     .eq('id', user.id)
     .single()
 
-  const officerRoles = ['officer', 'office_staff', 'admin']
+  const officerRoles = ['officer', 'office_staff', 'admin', 'moderator']
   if (!profile?.role || !officerRoles.includes(profile.role)) {
     redirect('/dashboard')
   }

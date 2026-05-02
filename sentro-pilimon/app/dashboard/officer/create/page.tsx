@@ -67,7 +67,7 @@ export default async function CreateAnnouncementPage() {
     .eq('id', user.id)
     .single()
 
-  const officerRoles = ['officer', 'office_staff', 'admin']
+  const officerRoles = ['officer', 'office_staff', 'admin', 'moderator']
   if (!profile?.role || !officerRoles.includes(profile.role)) {
     redirect('/dashboard')
   }

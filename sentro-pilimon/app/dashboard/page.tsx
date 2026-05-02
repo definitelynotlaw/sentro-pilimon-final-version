@@ -24,7 +24,7 @@ export default async function DashboardPage() {
     case 'moderator':
     case 'officer':
     case 'office_staff':
-      redirect('/dashboard/staff')
+      redirect('/dashboard/officer')
     case 'student':
     default:
       redirect('/dashboard/student')
