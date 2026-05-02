@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { BottomTabBar } from '@/components/navigation/BottomTabBar'
 import { TopNavBar } from '@/components/navigation/TopNavBar'
-import { Users, Grid3X3, FileText, BarChart3, Settings, Shield, ImageIcon } from 'lucide-react'
+import { Users, Grid3X3, FileText, BarChart3, Settings, Shield, ImageIcon, Plus } from 'lucide-react'
 
 export default async function AdminDashboardPage() {
   const supabase = await createClient()
@@ -140,6 +140,41 @@ export default async function AdminDashboardPage() {
               <ImageIcon className="h-8 w-8 mb-3" style={{ color: '#6B0000' }} />
               <h3 className="font-semibold mb-1" style={{ color: '#1A1A18' }}>Org Logos</h3>
               <p className="text-sm" style={{ color: '#5A5A56' }}>Upload logos for organizations</p>
+            </Link>
+          </div>
+        </div>
+
+        {/* Post Management */}
+        <div className="mb-8">
+          <h2
+            className="text-lg font-semibold mb-4"
+            style={{ color: '#1A1A18', fontFamily: "'Playfair Display', Georgia, serif" }}
+          >
+            Post Management
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Link
+              href="/dashboard/officer/create"
+              className="p-4 rounded-xl text-white text-center font-medium flex items-center justify-center gap-2"
+              style={{ backgroundColor: '#6B0000' }}
+            >
+              <Plus className="h-5 w-5" />
+              Create New Announcement
+            </Link>
+            <Link
+              href="/dashboard/officer"
+              className="p-4 rounded-xl text-center font-medium flex items-center justify-center gap-2"
+              style={{ backgroundColor: '#F5ECEC', color: '#6B0000' }}
+            >
+              <FileText className="h-5 w-5" />
+              My Announcements
+            </Link>
+            <Link
+              href="/dashboard/moderation"
+              className="p-4 rounded-xl text-center font-medium flex items-center justify-center gap-2"
+              style={{ backgroundColor: '#F3EEF8', color: '#4A1A7A' }}
+            >
+              My Announcements
             </Link>
           </div>
         </div>
