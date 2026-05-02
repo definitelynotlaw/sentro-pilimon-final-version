@@ -24,7 +24,7 @@ export async function submitRSVP(
       .select('id')
       .eq('announcement_id', announcementId)
       .eq('user_id', userData.user.id)
-      .single()
+      .maybeSingle()
 
     let rsvpId: string
 
