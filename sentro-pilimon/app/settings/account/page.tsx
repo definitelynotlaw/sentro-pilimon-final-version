@@ -114,7 +114,12 @@ export default function AccountSettingsPage() {
       })
 
       if (updateError) {
-        setPasswordError(updateError.message || 'Failed to update password')
+        console.error('Supabase updateUser error:', updateError)
+        if (updateError.message?.toLowerCase().includes('same password') || updateError.status === 422) {
+          setPasswordError('New password must be different from your current password.')
+        } else {
+          setPasswordError(updateError.message || 'Failed to update password')
+        }
       } else {
         setPasswordSuccess(true)
         reset()
