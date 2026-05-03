@@ -5,7 +5,6 @@ import { createClient } from '@/lib/supabase/server'
 import { BottomTabBar } from '@/components/navigation/BottomTabBar'
 import { TopNavBar } from '@/components/navigation/TopNavBar'
 import { AnnouncementForm } from '@/components/dashboard/AnnouncementForm'
-import { allOrganizations } from '@/data/organizations'
 
 interface Category {
   id: string
@@ -40,11 +39,11 @@ async function getFormData() {
     .eq('status', 'active')
     .order('name')
 
-  // Combine static orgs + database orgs + offices, deduped by id
   const allOrgs: Organization[] = [
-    ...allOrganizations, // Static data: student councils, dept orgs, university orgs, service offices
-    ...(dbOrganizations || []).filter(o => !allOrganizations.some(ao => ao.id === o.id)), // DB orgs not in static
-    ...(offices || []).filter(o => !allOrganizations.some(ao => ao.id === o.id)).map(o => ({ id: o.id, name: o.name, slug: o.slug })), // Offices not in static
+    ...(dbOrganizations || []),
+    ...(offices || [])
+      .filter(o => !(dbOrganizations || []).some(d => d.slug === o.slug))
+      .map(o => ({ id: o.id, name: o.name, slug: o.slug})),
   ].sort((a, b) => a.name.localeCompare(b.name))
 
   return {
@@ -77,9 +76,7 @@ export default async function CreateAnnouncementPage() {
   return (
     <main className="min-h-screen pb-24 md:pb-0">
       <TopNavBar />
-
       <div className="max-w-2xl mx-auto px-4 py-8">
-        {/* Back */}
         <Link
           href="/dashboard/officer"
           className="inline-flex items-center gap-2 mb-6 text-sm"
@@ -88,14 +85,12 @@ export default async function CreateAnnouncementPage() {
           <ArrowLeft className="h-4 w-4" />
           Back to Announcements
         </Link>
-
         <h1
           className="text-2xl font-bold mb-6"
           style={{ color: '#1A1A18', fontFamily: "'Playfair Display', Georgia, serif" }}
         >
           Create Announcement
         </h1>
-
         <div
           className="bg-white rounded-xl p-6"
           style={{ border: '1px solid #EBEBEA' }}
@@ -106,7 +101,6 @@ export default async function CreateAnnouncementPage() {
           />
         </div>
       </div>
-
       <BottomTabBar />
     </main>
   )
