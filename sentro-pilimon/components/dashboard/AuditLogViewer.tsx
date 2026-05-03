@@ -1,5 +1,4 @@
 'use client'
-
 import { useState, useEffect } from 'react'
 import { format } from 'date-fns'
 import { Activity } from 'lucide-react'
@@ -39,7 +38,6 @@ export function AuditLogViewer() {
       }
       setIsLoading(false)
     }
-
     fetchLogs()
   }, [])
 
