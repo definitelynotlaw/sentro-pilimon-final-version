@@ -5,13 +5,14 @@ import { Clock } from 'lucide-react'
 interface CountdownTimerProps {
   startDate: Date
   endDate: Date
+  large?: boolean
 }
 
 function getCountdownState(startDate: Date, endDate: Date) {
   const now = new Date()
   const expiredAt = new Date(endDate.getTime() + 12 * 60 * 60 * 1000)
 
-  if (now >= expiredAt) return { label: 'Expired', color: '#9A9A95', diff: 0, expired: true }
+  if (now >= expiredAt) return { label: 'Expired', color: '#9A9A95', expired: true }
 
   const target = now < startDate ? startDate : endDate
   const prefix = now < startDate ? 'Starts in' : 'Ends in'
@@ -28,10 +29,10 @@ function getCountdownState(startDate: Date, endDate: Date) {
   else if (hours > 0) label = `${prefix} ${hours}h ${mins}m`
   else label = `${prefix} ${mins}m ${secs}s`
 
-  return { label, color, diff, expired: false }
+  return { label, color, expired: false }
 }
 
-export function CountdownTimer({ startDate, endDate }: CountdownTimerProps) {
+export function CountdownTimer({ startDate, endDate, large = false }: CountdownTimerProps) {
   const [state, setState] = useState(() => getCountdownState(startDate, endDate))
 
   useEffect(() => {
@@ -40,6 +41,22 @@ export function CountdownTimer({ startDate, endDate }: CountdownTimerProps) {
     }, 1000)
     return () => clearInterval(interval)
   }, [startDate, endDate])
+
+  if (large) {
+    return (
+      <div
+        className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg font-medium"
+        style={{
+          backgroundColor: `${state.color}18`,
+          color: state.color,
+          fontSize: '0.95rem',
+        }}
+      >
+        <Clock className="h-4 w-4" />
+        {state.label}
+      </div>
+    )
+  }
 
   return (
     <span className="flex items-center gap-1 text-xs font-medium" style={{ color: state.color }}>

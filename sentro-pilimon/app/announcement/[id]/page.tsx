@@ -10,6 +10,7 @@ import { ShareButtons } from '@/components/announcement/ShareButtons'
 import { QRModal } from '@/components/announcement/QRModal'
 import { RSVPButton } from '@/components/announcement/RSVPButton'
 import { PLMunLogo } from '@/components/shared/PLMunLogo'
+import { CountdownTimer } from '@/components/bulletin/CountdownTimer'
 import type { Metadata } from 'next'
 
 interface PageProps {
@@ -88,24 +89,18 @@ export default async function AnnouncementPage({ params }: PageProps) {
   }
 
   const { going, interested } = await getRSVPCounts(id)
+  const startDate = new Date(announcement.start_datetime)
+  const endDate = new Date(announcement.end_datetime)
 
   return (
     <main className="min-h-screen pb-24 md:pb-8" style={{ backgroundColor: '#FAFAF7' }}>
       <div className="max-w-4xl mx-auto px-4 py-4 flex items-center gap-4">
-        <Link
-          href="/"
-          className="flex items-center gap-2 transition-colors"
-          style={{ color: '#6B0000' }}
-        >
+        <Link href="/" className="flex items-center gap-2 transition-colors" style={{ color: '#6B0000' }}>
           <PLMunLogo size="sm" />
           <span className="font-semibold hidden md:inline">Sentro Pilimon</span>
         </Link>
         <span style={{ color: '#D4D4CF' }}>|</span>
-        <Link
-          href="/"
-          className="inline-flex items-center gap-2 transition-colors"
-          style={{ color: '#6B0000' }}
-        >
+        <Link href="/" className="inline-flex items-center gap-2 transition-colors" style={{ color: '#6B0000' }}>
           <ArrowLeft className="h-4 w-4" />
           <span style={{ fontWeight: 500 }}>Back to Bulletin</span>
         </Link>
@@ -123,11 +118,7 @@ export default async function AnnouncementPage({ params }: PageProps) {
                   transformOrigin: 'center center',
                 }}
               >
-                <img
-                  src={announcement.poster_url}
-                  alt={announcement.title}
-                  className="w-full h-full object-cover"
-                />
+                <img src={announcement.poster_url} alt={announcement.title} className="w-full h-full object-cover" />
               </div>
             ) : (
               <div
@@ -142,8 +133,6 @@ export default async function AnnouncementPage({ params }: PageProps) {
                 </span>
               </div>
             )}
-
-            {/* Category Badge */}
             <div className="absolute top-3 left-3">
               <span
                 className="px-2 py-1 text-xs font-semibold rounded-full"
@@ -168,12 +157,20 @@ export default async function AnnouncementPage({ params }: PageProps) {
                     <Calendar className="h-5 w-5" style={{ color: '#C9972C' }} />
                     <div>
                       <p style={{ color: '#1A1A18' }}>
-                        {format(new Date(announcement.start_datetime), 'EEEE, MMMM d, yyyy')}
+                        {format(startDate, 'EEEE, MMMM d, yyyy')}
                       </p>
                       <p style={{ color: '#5A5A56' }}>
-                        {format(new Date(announcement.start_datetime), 'h:mm a')} — {format(new Date(announcement.end_datetime), 'h:mm a')}
+                        {format(startDate, 'h:mm a')} — {format(endDate, 'h:mm a')}
                       </p>
                     </div>
+                  </div>
+
+                  {/* Countdown Timer */}
+                  <div className="flex items-start gap-3">
+                    <div className="h-5 w-5 flex items-center justify-center">
+                      <div className="h-2 w-2 rounded-full" style={{ backgroundColor: '#C9972C' }} />
+                    </div>
+                    <CountdownTimer startDate={startDate} endDate={endDate} large />
                   </div>
 
                   {announcement.venue && (
@@ -207,16 +204,13 @@ export default async function AnnouncementPage({ params }: PageProps) {
                 className="md:w-48 flex flex-col items-center text-center p-4 rounded-xl"
                 style={{ backgroundColor: '#FAFAF7', border: '1px solid #EBEBEA' }}
               >
-                <QRModal
-                  announcementId={id}
-                  qrUrl={`/api/qr/generate?announcementId=${id}`}
-                />
+                <QRModal announcementId={id} qrUrl={`/api/qr/generate?announcementId=${id}`} />
                 <p className="text-xs font-medium mt-3 mb-3" style={{ color: '#5A5A56' }}>Tap to enlarge</p>
                 <ShareButtons announcementId={id} />
               </div>
             </div>
 
-            {/* About this Event - below both columns */}
+            {/* About this Event */}
             <div className="border-t mt-6 pt-4" style={{ borderColor: '#EBEBEA' }}>
               <h2 className="text-lg font-semibold mb-3" style={{ color: '#1A1A18' }}>
                 About this Event
@@ -225,7 +219,6 @@ export default async function AnnouncementPage({ params }: PageProps) {
                 {announcement.description}
               </p>
 
-              {/* RSVP Section */}
               <div className="border-t pt-4" style={{ borderColor: '#EBEBEA' }}>
                 <p className="text-sm font-medium mb-3" style={{ color: '#1A1A18' }}>
                   Want to join this event?
