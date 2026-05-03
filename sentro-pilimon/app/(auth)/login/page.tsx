@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import { PLMunLogo } from '@/components/shared/PLMunLogo'
 import { Mail, Lock, Loader2, Eye, EyeOff, PartyPopper } from 'lucide-react'
 
-export default function LoginPage() {
+function LoginPageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const supabase = createClient()
@@ -181,5 +181,14 @@ export default function LoginPage() {
         </div>
       </main>
     </>
+  )
+}
+
+import { Suspense } from 'react'
+export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginPageContent />
+    </Suspense>
   )
 }
