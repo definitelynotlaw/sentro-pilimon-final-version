@@ -56,6 +56,7 @@ export default function RegisterPage() {
         },
       })
       if (signUpError) { setError(signUpError.message); return }
+      await supabase.auth.signOut()
       setSuccess(true)
     } catch {
       setError('An unexpected error occurred')
