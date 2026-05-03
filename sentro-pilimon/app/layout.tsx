@@ -9,13 +9,11 @@ const playfair = Playfair_Display({
   subsets: ["latin"],
   display: "swap",
 });
-
 const jakartaSans = Plus_Jakarta_Sans({
   variable: "--font-body",
   subsets: ["latin"],
   display: "swap",
 });
-
 const jetbrainsMono = JetBrains_Mono({
   variable: "--font-mono",
   subsets: ["latin"],
@@ -27,6 +25,10 @@ export const metadata: Metadata = {
   description: "QR-enabled hybrid campus bulletin for Pamatasan ng Lungsod ng Muntinlupa. Stay updated with official announcements, events, and organization activities.",
   keywords: ["PLMun", "bulletin", "campus", "announcements", "events", "QR", "Sentro Pilimon"],
   authors: [{ name: "Pamantasan ng Lungsod ng Muntinlupa" }],
+  icons: {
+    icon: "/sentro-pilimon-logo.svg",
+    apple: "/sentro-pilimon-logo.svg",
+  },
   openGraph: {
     title: "Sentro Pilimon | PLMun Campus Bulletin",
     description: "Your official source for campus announcements and events",
@@ -43,9 +45,8 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${playfair.variable} ${jakartaSans.variable} ${jetbrainsMono.variable}`}>
       <head>
-        <link rel="icon" href="/plmun-seal.png.svg" type="image/svg+xml" />
-        <link rel="icon" href="/favicon.ico" sizes="any" />
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <link rel="icon" href="/sentro-pilimon-logo.svg" type="image/svg+xml" />
+        <link rel="apple-touch-icon" href="/sentro-pilimon-logo.svg" />
         <meta name="theme-color" content="#6B0000" />
       </head>
       <body className="min-h-screen flex flex-col antialiased">
