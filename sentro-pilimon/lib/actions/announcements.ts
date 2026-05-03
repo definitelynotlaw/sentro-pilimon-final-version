@@ -183,6 +183,7 @@ export async function getPublishedAnnouncements(
       `)
       .eq('status', 'published')
       .order('start_datetime', { ascending: true })
+      .gt('end_datetime', new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString())
 
     if (filters.category) {
       query = query.eq('category_id', filters.category)

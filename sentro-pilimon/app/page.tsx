@@ -37,6 +37,7 @@ async function getAnnouncements() {
     `)
     .eq('status', 'published')
     .order('start_datetime', { ascending: true })
+    .gt('end_datetime', new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString())
     .limit(20)
 
   return data || []

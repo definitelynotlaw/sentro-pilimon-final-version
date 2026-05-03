@@ -3,6 +3,7 @@ import Image from 'next/image'
 import { format } from 'date-fns'
 import { Calendar, MapPin, Users } from 'lucide-react'
 import { StatusBadge } from './StatusBadge'
+import { CountdownTimer } from './CountdownTimer'
 
 export interface AnnouncementCardProps {
   id: string
@@ -104,7 +105,7 @@ export function AnnouncementCard({
           </div>
         )}
 
-        {/* Status Badge (if provided) */}
+        {/* Status Badge */}
         {status && (
           <div className="absolute top-3 right-3">
             <StatusBadge status={status} size="sm" />
@@ -124,7 +125,7 @@ export function AnnouncementCard({
           {title}
         </h3>
 
-        <div className="flex items-center gap-4 text-sm mb-3" style={{ color: '#5A5A56' }}>
+        <div className="flex items-center gap-4 text-sm mb-2" style={{ color: '#5A5A56' }}>
           <span className="flex items-center gap-1">
             <Calendar className="h-3.5 w-3.5" style={{ color: '#C9972C' }} />
             {formattedDate} · {formattedTime}
@@ -135,6 +136,11 @@ export function AnnouncementCard({
               <span className="truncate max-w-[100px]">{venue}</span>
             </span>
           )}
+        </div>
+
+        {/* Countdown Timer */}
+        <div className="mb-3">
+          <CountdownTimer startDate={startDate} endDate={endDate} />
         </div>
 
         {/* Footer */}
